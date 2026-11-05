@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Підсумок проєкту «База даних школи»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#E8E4DB; --card:#FFFFFF; --ink:#1B2330; --muted:#5E6675; --line:#D9D3C6; --soft:#F3F0E8;
+  --accent:#1D3F8F; --accent-ink:#FFFFFF; --stamp:#B3261E; --mark:#FFE58A; --mark-ink:#1B2330;
+  --ok:#1E7A45; --ok-bg:#E3F4EA; --bad:#B42318; --bad-bg:#FDECEA;
+  --paper:#FFFFFF; --paper-ink:#1B1B1B; --paper-line:#CFC8B8; --paper-soft:#F1EEE6;
+  --font:"Onest","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"PT Serif",Georgia,"Times New Roman",serif;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#14171C; --card:#1C2027; --ink:#E8EBF0; --muted:#9AA3B2; --line:#2C323D; --soft:#232832;
+    --accent:#8FB0FF; --accent-ink:#0D1424; --stamp:#F0786F; --mark:#4B4420; --mark-ink:#F3EBC0;
+    --ok:#5BC489; --ok-bg:#153222; --bad:#F08A80; --bad-bg:#3A1B19; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#14171C; --card:#1C2027; --ink:#E8EBF0; --muted:#9AA3B2; --line:#2C323D; --soft:#232832;
+  --accent:#8FB0FF; --accent-ink:#0D1424; --stamp:#F0786F; --mark:#4B4420; --mark-ink:#F3EBC0;
+  --ok:#5BC489; --ok-bg:#153222; --bad:#F08A80; --bad-bg:#3A1B19; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{margin:0;background:var(--desk);color:var(--ink);font:400 16px/1.6 var(--font);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--card)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+.scroll{overflow-x:auto}
+
+/* ---------- header ---------- */
+.top{padding:26px 0 22px}
+.top-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:center}
+@media (max-width:860px){.top-grid{grid-template-columns:1fr}}
+.stamp-eyebrow{display:inline-block;border:2px solid var(--stamp);color:var(--stamp);padding:3px 12px;border-radius:4px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;transform:rotate(-2deg);margin-bottom:14px}
+.top h1{margin:0 0 10px;font-size:clamp(40px,6.4vw,72px);line-height:1;font-weight:700;letter-spacing:-.025em}
+.top .sub{margin:0 0 18px;font-size:19px;color:var(--muted);max-width:36ch}
+.who{max-width:360px}
+.who label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+.who input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.saved-note{font-size:13px;color:var(--muted);margin:6px 0 0}
+.storewarn{display:none;background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad);border-radius:8px;padding:10px 14px;margin:0 0 14px;font-size:15px}
+.storewarn.on{display:block}
+.illus{width:100%;max-width:470px;justify-self:center}
+.illus svg{width:100%;height:auto;display:block}
+.il-card{fill:var(--card);stroke:var(--line);stroke-width:1.5}
+.il-bar{fill:var(--line)}
+.il-acc{fill:var(--accent)}
+.il-field{fill:none;stroke:var(--line);stroke-width:2}
+.il-paper{fill:#fff;stroke:#cfc8b8;stroke-width:1.5}
+.il-pbar{fill:#d5d8de}
+.il-pdark{fill:#2a2f38}
+.il-pgrp{fill:#efeadf}
+.il-stamp{fill:none;stroke:var(--stamp);stroke-width:3}
+.il-stamptxt{fill:var(--stamp);font:700 14px var(--font);letter-spacing:.08em}
+
+/* ---------- tabs ---------- */
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs .wrap::-webkit-scrollbar{display:none}
+nav.tabs a{padding:14px 16px;text-decoration:none;color:var(--muted);font-weight:600;white-space:nowrap;border-bottom:3px solid transparent}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding:28px 0 70px}
+section.view{display:none}
+section.view.on{display:block}
+
+/* ---------- prose ---------- */
+.prose{max-width:76ch}
+.prose h2{font-size:26px;line-height:1.2;margin:38px 0 10px}
+.prose h2:first-child{margin-top:0}
+.prose h3{font-size:19px;margin:24px 0 6px}
+.prose p,.prose li{margin:0 0 10px}
+.lead{font-size:18px;color:var(--muted)}
+table.plain{border-collapse:collapse;width:100%;margin:8px 0 18px;font-size:15px;background:var(--card)}
+table.plain th,table.plain td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+table.plain th{background:var(--soft);font-weight:600}
+.callout{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:6px;padding:12px 16px;margin:8px 0 18px}
+.route{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0 8px;counter-reset:r}
+@media (max-width:900px){.route{grid-template-columns:1fr 1fr}}
+.route a{counter-increment:r;position:relative;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:34px 12px 12px;text-decoration:none;color:var(--ink);font-weight:600;font-size:15px;line-height:1.35}
+.route a::before{content:counter(r);position:absolute;left:12px;top:8px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:13px;display:flex;align-items:center;justify-content:center}
+.route a small{display:block;font-weight:400;color:var(--muted);margin-top:2px}
+.schema{width:100%;max-width:720px;height:auto;display:block;margin:6px 0 18px}
+
+/* ---------- builder layout ---------- */
+.builder{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:980px){.builder{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px}
+.pad{padding:16px}
+.panel h2{font-size:17px;margin:0 0 8px}
+.ws{display:flex;flex-direction:column;gap:18px;min-width:0}
+.tasks{padding:16px;position:relative}
+.tnums{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tnums button{min-width:38px;height:38px;padding:0 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-weight:700;cursor:pointer}
+.tnums button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.tnums button.done{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.tnums button.bonus{border-style:dashed}
+.task h3{margin:0 0 4px;font-size:18px;line-height:1.3;padding-right:4px}
+.task .meta{font-size:13px;color:var(--muted);margin:0 0 8px}
+.task p{margin:0 0 12px}
+.counter{font-weight:600;background:var(--soft);border-radius:6px;padding:7px 10px;margin:0 0 12px;font-size:15px}
+details.hint summary{cursor:pointer;color:var(--accent);font-weight:600;margin-bottom:6px}
+details.hint p{font-size:15px;background:var(--soft);padding:10px 12px;border-radius:8px}
+.stamp-row{margin:0 0 10px}
+.stamp-done{display:inline-block;border:3px double var(--stamp);color:var(--stamp);padding:2px 12px;border-radius:4px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:13px;transform:rotate(-3deg);opacity:.92}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;text-decoration:none;color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:6px 11px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.feedback{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:15px;display:none}
+.feedback.ok{display:block;background:var(--ok-bg);color:var(--ok)}
+.feedback.bad{display:block;background:var(--bad-bg);color:var(--bad)}
+.howto{padding:12px 16px}
+.howto summary{cursor:pointer;font-weight:600}
+.howto ol{margin:10px 0 0;padding-left:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;counter-reset:h}
+@media (max-width:900px){.howto ol{grid-template-columns:1fr 1fr}}
+.howto li{counter-increment:h;position:relative;background:var(--soft);border-radius:8px;padding:30px 10px 10px;font-size:14px;line-height:1.4}
+.howto li::before{content:counter(h);position:absolute;left:10px;top:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600}
+.chip[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--soft)}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+.empty{color:var(--muted);padding:6px 0}
+
+/* ---------- form builder grid ---------- */
+table.ftable{border-collapse:collapse;width:100%;font-size:14px}
+table.ftable th{background:var(--soft);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:600}
+table.ftable td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.ftable tr.off td{opacity:.45}
+table.ftable tr.off td:first-child,table.ftable tr.off td:first-child *{opacity:1}
+table.ftable input[type=text],table.ftable select{width:100%;min-width:150px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+table.ftable input[type=checkbox]{width:18px;height:18px}
+.fname{font-weight:600}
+.fk{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.warn{display:block;font-size:12px;color:var(--bad);margin-top:3px}
+.pk-row td{background:var(--soft);color:var(--muted)}
+.titlerow{padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.titlerow label{font-weight:600}
+.titlerow input{flex:1 1 260px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+
+/* ---------- form preview ---------- */
+.stagebg{background:var(--soft);padding:20px;border-radius:0 0 10px 10px}
+.paperform{background:var(--paper);color:var(--paper-ink);border-radius:6px;border:1px solid var(--paper-line);border-top:6px solid var(--accent);max-width:560px;margin:0 auto;box-shadow:0 6px 20px rgba(20,25,35,.12)}
+.pf-head{padding:16px 22px 10px;border-bottom:1px dashed var(--paper-line)}
+.pf-title{font-family:var(--serif);font-size:24px;font-weight:700;line-height:1.2}
+.pf-sub{font-size:13px;color:#6b6558}
+.pf-body{padding:14px 22px 6px}
+.ff{margin:0 0 14px}
+.ff label{display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#2b2f38}
+.req{color:var(--stamp)}
+.ff input,.ff select{width:100%;padding:9px 10px;border:1.5px solid #bdb6a5;border-radius:6px;background:#fff;color:#1b1b1b;font-size:16px}
+.ff input[aria-invalid="true"],.ff select[aria-invalid="true"]{border-color:#B42318;background:#FDECEA}
+.ff input:disabled,.ff select:disabled{background:#f4f1e9}
+.ferr{color:#B42318;font-size:13px;margin-top:3px}
+.pf-foot{padding:6px 22px 18px;display:flex;gap:10px;flex-wrap:wrap}
+.pf-btn{padding:10px 18px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:700;cursor:pointer}
+.pf-btn.sec{background:transparent;color:#2b2f38;border-color:#bdb6a5}
+.pf-msg{margin:0 22px 18px;padding:10px 12px;border-radius:6px;font-size:14px;display:none}
+.pf-msg.ok{display:block;background:#E3F4EA;color:#1E7A45}
+.pf-msg.bad{display:block;background:#FDECEA;color:#B42318}
+.pf-msg ul{margin:4px 0 0;padding-left:18px}
+.autonum{font-size:13px;color:#6b6558;margin:0 0 12px}
+
+/* ---------- report builder ---------- */
+.fieldboxes{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.fbox{border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:8px;min-width:190px;background:var(--card)}
+.fbox h4{margin:0;padding:7px 10px;font-size:14px;border-bottom:1px solid var(--line)}
+.fbox button{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:5px 10px;border:0;background:none;cursor:pointer;font-size:14px}
+.fbox button:hover{background:var(--soft)}
+.fbox button[aria-pressed="true"]{background:var(--mark);color:var(--mark-ink);font-weight:600}
+.fbox button.k{font-weight:600}
+.cols{display:grid;gap:6px;margin:6px 0 14px}
+.col-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;background:var(--soft);border-radius:8px;padding:6px 8px}
+.col-row input{padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--card);min-width:0}
+.col-row small{color:var(--muted);white-space:nowrap}
+.col-row button{border:0;background:none;cursor:pointer;font-size:18px;line-height:1;padding:4px 7px;border-radius:5px;color:var(--muted)}
+.col-row button:hover{background:var(--card);color:var(--ink)}
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px 18px;margin-top:6px}
+.settings label.l{display:block;font-size:13px;color:var(--muted);margin-bottom:3px}
+.settings select,.settings input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+.settings .two{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.settings .check{display:flex;gap:8px;align-items:center;margin:2px 0}
+.settings .check input{width:18px;height:18px}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.rhead h2{margin:0}
+
+.paper{background:var(--paper);color:var(--paper-ink);font-family:var(--serif);max-width:780px;margin:0 auto;padding:30px 34px 22px;border:1px solid var(--paper-line);box-shadow:0 6px 22px rgba(20,25,35,.14);font-size:15px;line-height:1.45}
+.p-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--paper-ink);padding-bottom:8px;margin-bottom:14px}
+.p-head h2{font-size:26px;margin:0;font-weight:700;line-height:1.15}
+.p-date{font-size:13px;color:#555;white-space:nowrap}
+table.p-table{width:100%;border-collapse:collapse;font-size:14.5px}
+table.p-table th{text-align:left;border-bottom:1.5px solid var(--paper-ink);padding:5px 8px;font-weight:700}
+table.p-table td{padding:4px 8px;border-bottom:1px solid #e3ded0}
+table.p-table tr.g td{background:var(--paper-soft);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--paper-line)}
+table.p-table tr.gf td{font-style:italic;color:#444;border-bottom:1.5px solid var(--paper-line);text-align:right;padding:5px 8px 9px}
+table.p-table tr.gt td{font-weight:700;border-top:2px solid var(--paper-ink);padding:8px;text-align:right}
+.p-foot{display:flex;justify-content:space-between;margin-top:16px;font-size:12px;color:#777;border-top:1px solid #ddd8c9;padding-top:6px}
+.p-err{font-family:var(--font);color:#B42318;background:#FDECEA;border-radius:6px;padding:10px 12px}
+.stagebg.rep{padding:22px 14px}
+
+/* ---------- tables view ---------- */
+.rt-wrap{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:8px;background:var(--card);margin-top:10px}
+table.rt{border-collapse:collapse;width:100%;font-size:14px}
+table.rt th{position:sticky;top:0;background:var(--soft);text-align:left;padding:7px 10px;border-bottom:2px solid var(--accent);white-space:nowrap}
+table.rt td{padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.rt tr.new td{background:var(--mark);color:var(--mark-ink);font-weight:600}
+
+/* ---------- result ---------- */
+.report{max-width:800px}
+.report .big{font-size:26px;font-weight:700;margin:6px 0 14px}
+.report .row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.report .row b{font-weight:600}
+.report .st{font-weight:600}
+.report .st.ok{color:var(--ok)}
+.report h3{margin:22px 0 6px;font-size:18px}
+.objs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.objs .panel{padding:12px 16px}
+.objs ul{margin:6px 0 0;padding-left:18px}
+.qz{margin:0 0 14px}
+.qz p{margin:0 0 6px;font-weight:600}
+.qz .opts{display:flex;gap:8px;flex-wrap:wrap}
+.qz .opts button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600}
+.qz .opts button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
+.qz .opts button.right{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.qz .opts button.wrongc{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.qz .why{font-size:14px;color:var(--muted);margin-top:4px}
+
+/* ---------- print: only the report ---------- */
+@media print{
+  body{background:#fff}
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{position:absolute;left:0;top:0;width:100%}
+  .paper{box-shadow:none;border:0;max-width:none;padding:0}
+  table.p-table tr{break-inside:avoid}
+  table.p-table tr.g{break-after:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- final lesson additions ---------- */
+.stepno{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 6px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 18px}
+@media (max-width:760px){.modes{grid-template-columns:1fr}}
+.mode{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px 8px}
+.mode.free{border-top:5px solid var(--ok)}
+.mode.once{border-top:5px solid var(--stamp)}
+.mode h3{margin:0 0 6px;font-size:19px}
+.mode p{margin:0 0 10px}
+.next{margin:22px 0 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn.retry{margin-top:12px}
+.planlist{margin:0;padding-left:22px}
+.planlist li{margin:0 0 14px}
+.planlist label{display:block;font-weight:600;margin-bottom:4px}
+.planlist textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);resize:vertical}
+.sa-row{padding:14px 18px;border-bottom:1px solid var(--line)}
+.sa-row:last-child{border-bottom:0}
+.sa-q{font-weight:600;margin:0 0 4px}
+.sa-auto{font-size:13px;color:var(--muted);margin:0 0 8px}
+.sa-opts,.topts{display:flex;gap:8px;flex-wrap:wrap}
+.sa-opts button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600}
+.sa-opts button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+ul.weak{margin:6px 0 0;padding-left:20px}
+ul.rules{margin:0 0 16px;padding-left:20px}
+ul.rules li{margin:0 0 7px}
+.tprog{font-weight:600;color:var(--muted);margin:0 0 8px}
+.progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;margin:0 0 16px}
+.progress i{display:block;height:100%;background:var(--accent)}
+.tq{font-size:20px;font-weight:600;line-height:1.35;margin:0 0 16px;max-width:62ch}
+.topts{flex-direction:column;margin:0 0 16px}
+.topts button{text-align:left;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;font-size:16px;line-height:1.4}
+.topts button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.tact{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.testwarn{border-left:5px solid var(--bad)}
+.tdone .big{font-size:32px;font-weight:700;margin:4px 0 6px}
+.tdone .row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+#testbox{max-width:760px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-grid">
+    <div>
+      <div class="storewarn" id="storewarn" role="alert">Браузер не дозволяє зберігати прогрес (можливо, увімкнено приватний режим). Тест у такому режимі недоступний: відкрий сторінку у звичайному вікні браузера.</div>
+      <span class="stamp-eyebrow">Підсумковий урок</span>
+      <h1>Мій проєкт: база даних школи</h1>
+      <p class="sub">Закріпи практику, оціни свою роботу й пройди тест із розділу 1.</p>
+      <div class="who">
+        <label for="who">Твоє прізвище та ім’я (обов’язково для тесту)</label>
+        <input id="who" type="text" autocomplete="off" placeholder="Наприклад, Ковальчук Марія">
+        <p class="saved-note">Практична частина зберігається автоматично. Тест можна пройти лише один раз.</p>
+      </div>
+    </div>
+    <div class="illus" aria-hidden="true">
+      <svg viewBox="0 0 470 280">
+        <g transform="rotate(-4 120 150)">
+          <rect class="il-card" x="12" y="40" width="210" height="210" rx="10"/>
+          <rect class="il-acc" x="12" y="40" width="210" height="9" rx="4"/>
+          <rect class="il-pdark" x="30" y="66" width="120" height="12" rx="3" style="fill:var(--ink)"/>
+          <rect class="il-bar" x="30" y="94" width="60" height="7" rx="3"/>
+          <rect class="il-field" x="30" y="105" width="172" height="26" rx="5"/>
+          <rect class="il-bar" x="30" y="143" width="70" height="7" rx="3"/>
+          <rect class="il-field" x="30" y="154" width="172" height="26" rx="5"/>
+          <path d="M184 165 l6 6 l6 -6" fill="none" stroke="var(--muted)" stroke-width="2"/>
+          <rect class="il-acc" x="30" y="198" width="86" height="30" rx="6"/>
+          <rect x="44" y="210" width="58" height="6" rx="3" fill="var(--accent-ink)"/>
+        </g>
+        <g transform="rotate(3 330 150)">
+          <rect class="il-paper" x="232" y="18" width="222" height="238" rx="4"/>
+          <rect class="il-pdark" x="250" y="38" width="120" height="12"/>
+          <rect class="il-pbar" x="392" y="42" width="44" height="6"/>
+          <rect class="il-pdark" x="250" y="58" width="186" height="2"/>
+          <rect class="il-pgrp" x="250" y="70" width="186" height="16"/>
+          <rect class="il-pdark" x="256" y="75" width="40" height="6"/>
+          <rect class="il-pbar" x="256" y="96" width="90" height="6"/><rect class="il-pbar" x="380" y="96" width="50" height="6"/>
+          <rect class="il-pbar" x="256" y="112" width="76" height="6"/><rect class="il-pbar" x="380" y="112" width="50" height="6"/>
+          <rect class="il-pbar" x="256" y="128" width="100" height="6"/><rect class="il-pbar" x="380" y="128" width="50" height="6"/>
+          <rect class="il-pgrp" x="250" y="146" width="186" height="16"/>
+          <rect class="il-pdark" x="256" y="151" width="52" height="6"/>
+          <rect class="il-pbar" x="256" y="172" width="84" height="6"/><rect class="il-pbar" x="380" y="172" width="50" height="6"/>
+          <rect class="il-pbar" x="256" y="188" width="96" height="6"/><rect class="il-pbar" x="380" y="188" width="50" height="6"/>
+          <rect class="il-pdark" x="250" y="210" width="186" height="2"/>
+          <rect class="il-pdark" x="344" y="220" width="92" height="8"/>
+        </g>
+        <g transform="rotate(-10 400 250)"><rect class="il-stamp" x="338" y="226" width="124" height="34" rx="5"/><text class="il-stamptxt" x="400" y="249" text-anchor="middle">ЗАТВЕРДЖЕНО</text></g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Розділи">
+  <div class="wrap">
+    <a href="#start" data-view="start">Старт</a>
+    <a href="#forms" data-view="forms">Форми</a>
+    <a href="#reports" data-view="reports">Звіти</a>
+    <a href="#self" data-view="self">Самооцінка</a>
+    <a href="#test" data-view="test">Тест (1 спроба)</a>
+    <a href="#result" data-view="result">Мій результат</a>
+  </div>
+</nav>
+
+<main><div class="wrap">
+
+<!-- ===================== START ===================== -->
+<section class="view" id="v-start"><div class="prose">
+  <h2>Що робити на цьому уроці</h2>
+  <p class="lead">Ти завершуєш проєкт «Адміністратор бази даних школи». Спершу закріпиш практику, потім оціниш себе й пройдеш тест. Іди за кроками по порядку.</p>
+  <div class="route">
+    <a href="#forms">Форми<small>2 завдання, спроб скільки завгодно</small></a>
+    <a href="#reports">Звіти<small>2 завдання, спроб скільки завгодно</small></a>
+    <a href="#self">Самооцінка<small>план виступу й 5 пунктів</small></a>
+    <a href="#test">Тест<small>12 запитань, одна спроба</small></a>
+    <a href="#result">Результат<small>знімок екрана вчителю</small></a>
+  </div>
+  <div class="modes">
+    <div class="mode free">
+      <h3>Практична: пробуй скільки завгодно</h3>
+      <p>Кнопку «Перевірити завдання» можна натискати без обмежень, помилка нічого не псує. Система підкаже, що виправити.</p>
+      <p>Заплутався(-лась)? Натисни «Почати це завдання спочатку». Для вільних експериментів є «Пісочниця».</p>
+    </div>
+    <div class="mode once">
+      <h3>Тест: лише одна спроба</h3>
+      <p>На кожне запитання відповідаєш один раз, змінити відповідь не можна. Другого проходження немає.</p>
+      <p>Тому спершу зроби практичну частину: вона нагадає все потрібне. Починай тест, коли будеш готовий(-а).</p>
+    </div>
+  </div>
+  <p><a class="btn primary" href="#forms">Почати з форм</a></p>
+
+  <details class="hint" style="margin-top:22px"><summary>Нагадування: таблиця, запит, форма, звіт</summary>
+    <table class="plain">
+      <tr><th>Об’єкт</th><th>Для чого</th></tr>
+      <tr><td><b>Таблиця</b></td><td>зберігає записи</td></tr>
+      <tr><td><b>Запит</b></td><td>відбирає потрібні записи й обчислює</td></tr>
+      <tr><td><b>Форма</b></td><td>зручно вводить, змінює й показує записи; захищає від помилок</td></tr>
+      <tr><td><b>Звіт</b></td><td>оформлює результат для друку з групами та підсумками</td></tr>
+    </table>
+    <table class="plain">
+      <tr><th>Я хочу…</th><th>Використаю</th></tr>
+      <tr><td>вводити або виправляти дані</td><td>форму</td></tr>
+      <tr><td>знайти записи за умовою</td><td>запит</td></tr>
+      <tr><td>надрукувати підсумки й списки</td><td>звіт</td></tr>
+    </table>
+    <p>Схема зв’язків між таблицями. «Учні» і «Гуртки» не пов’язані напряму: між ними проміжна таблиця «Записи_на_гуртки».</p>
+    <svg class="schema" viewBox="0 0 720 220" role="img" aria-label="Схема зв’язків таблиць бази даних школи">
+    <g font-family="Onest, Segoe UI, Arial, sans-serif" font-size="15">
+      <g stroke="var(--muted)" stroke-width="2" fill="none">
+        <line x1="200" y1="45" x2="260" y2="45"/><line x1="460" y1="45" x2="520" y2="45"/><line x1="100" y1="70" x2="100" y2="150"/>
+        <line x1="200" y1="175" x2="260" y2="175"/><path d="M460 175 H620 V70"/>
+      </g>
+      <g font-size="13" fill="var(--muted)" font-weight="600">
+        <text x="248" y="38">1</text><text x="203" y="38">∞</text><text x="463" y="38">1</text><text x="505" y="38">∞</text>
+        <text x="106" y="86">1</text><text x="106" y="146">∞</text><text x="203" y="168">1</text><text x="246" y="168">∞</text><text x="626" y="86">1</text><text x="466" y="168">∞</text>
+      </g>
+      <g>
+        <rect x="0" y="20" width="200" height="50" rx="8" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="100" y="51" text-anchor="middle" fill="var(--ink)" font-weight="600">Класи</text>
+        <rect x="260" y="20" width="200" height="50" rx="8" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="360" y="51" text-anchor="middle" fill="var(--ink)" font-weight="600">Вчителі</text>
+        <rect x="520" y="20" width="200" height="50" rx="8" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="620" y="51" text-anchor="middle" fill="var(--ink)" font-weight="600">Гуртки</text>
+        <rect x="0" y="150" width="200" height="50" rx="8" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="100" y="181" text-anchor="middle" fill="var(--ink)" font-weight="600">Учні</text>
+        <rect x="260" y="150" width="200" height="50" rx="8" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="360" y="181" text-anchor="middle" fill="var(--ink)" font-weight="600">Записи_на_гуртки</text>
+      </g>
+    </g>
+  </svg>
+  </details>
+</div></section>
+
+<!-- ===================== FORMS ===================== -->
+<section class="view" id="v-forms">
+  <p class="stepno">Крок 1 з 5: форми</p>
+  <div class="builder">
+    <aside class="panel tasks" id="ftasks" aria-label="Завдання з форм"></aside>
+    <div class="ws">
+      <details class="panel howto" open><summary>Як працювати з конструктором форм</summary>
+        <ol><li>Обери <b>таблицю</b>, на якій будується форма.</li><li>У таблиці полів познач, що показувати, і налаштуй <b>підпис</b>, <b>елемент керування</b> та <b>обов’язковість</b>.</li><li>Дай формі <b>назву</b>, заповни її внизу й натисни «Зберегти запис».</li><li>Натисни <b>«Перевірити завдання»</b> ліворуч. Не вийшло — виправ і натисни ще раз.</li></ol>
+      </details>
+      <div class="panel pad"><h2>1. Таблиця форми</h2><div class="chips" id="fpick"></div><p class="note" id="fpicknote">Обери таблицю: форма працюватиме з її записами.</p></div>
+      <div class="panel"><div class="pad" style="padding-bottom:6px"><h2>2. Поля форми (Режим конструктора)</h2></div><div class="scroll" id="ffields"></div></div>
+      <div class="panel titlerow"><label for="ftitle">3. Назва форми</label><input id="ftitle" type="text" placeholder="Наприклад, Новий учень" autocomplete="off"></div>
+      <div class="panel"><div class="pad" style="padding-bottom:8px"><h2>4. Так бачитиме форму користувач (Режим форми)</h2><p class="note" style="margin:0">Заповни форму й збережи запис — він справді з’явиться в таблиці. <a href="#tables">Подивитись таблиці бази</a></p></div><div class="stagebg" id="fpreview"></div></div>
+    </div>
+  </div>
+  <p class="next"><a class="btn primary" href="#reports">Далі: звіти</a></p>
+</section>
+
+<!-- ===================== REPORTS ===================== -->
+<section class="view" id="v-reports">
+  <p class="stepno">Крок 2 з 5: звіти</p>
+  <div class="builder">
+    <aside class="panel tasks" id="rtasks" aria-label="Завдання зі звітів"></aside>
+    <div class="ws">
+      <details class="panel howto" open><summary>Як працювати з конструктором звітів</summary>
+        <ol><li>Обери <b>таблиці</b>, з яких беруться дані (вони з’єднаються самі).</li><li>Клікни на <b>поля</b> — вони стануть стовпцями звіту.</li><li>У макеті задай <b>заголовок, групування, сортування й підсумки</b>.</li><li>Переглянь звіт унизу й натисни <b>«Перевірити завдання»</b>. Не вийшло — виправ і натисни ще раз.</li></ol>
+      </details>
+      <div class="panel pad"><h2>1. Джерело даних</h2><div class="chips" id="rpick"></div><div class="fieldboxes" id="rfields"></div><p class="note" id="rpicknote">Обери таблиці, а потім клікай на поля. Клік по вже вибраному полю прибирає стовпець.</p>
+        <details class="hint" style="margin-top:10px"><summary>Схема зв’язків між таблицями</summary><div id="rschema"></div></details></div>
+      <div class="panel pad"><h2>2. Макет звіту</h2>
+        <div class="settings" style="margin-bottom:12px"><div><label class="l" for="rtitle">Заголовок звіту</label><input id="rtitle" type="text" placeholder="Наприклад, Учні за класами" autocomplete="off"></div></div>
+        <p class="lbl" style="font-size:13px;color:var(--muted);margin:0 0 4px">Стовпці звіту (можна змінити підпис і порядок)</p>
+        <div class="cols" id="rcols"></div>
+        <div class="settings" id="rsettings"></div>
+      </div>
+      <div class="panel"><div class="rhead"><h2>3. Попередній перегляд</h2><button class="btn small" id="printBtn" type="button">Друкувати</button></div><div class="stagebg rep"><div id="printArea"><div id="rpaper"></div></div></div></div>
+    </div>
+  </div>
+  <p class="next"><a class="btn primary" href="#self">Далі: самооцінка</a></p>
+</section>
+
+<!-- ===================== SELF ===================== -->
+<section class="view" id="v-self">
+  <div class="prose">
+    <p class="stepno">Крок 3 з 5: самооцінка</p>
+    <h2>Підготуй виступ і оціни себе</h2>
+    <p class="lead">Це не тест: правильних відповідей немає, відповідай чесно. Змінювати можна скільки завгодно.</p>
+    <h3>Частина 1. План виступу на 2 хвилини</h3>
+    <p>Коли вчитель попросить розповісти про проєкт, скажи три речі: що зробив(-ла), що вийшло найкраще, що покращив(-ла) б.</p>
+  </div>
+  <div class="panel pad" id="plan" style="max-width:760px"></div>
+  <div class="prose" style="margin-top:26px">
+    <h3>Частина 2. Самооцінювання</h3>
+    <p>Для кожного пункту обери один варіант.</p>
+  </div>
+  <div class="panel" id="selfbox" style="max-width:760px"></div>
+  <p class="note" id="selfnote"></p>
+  <div class="feedback" id="selfout" role="status" style="max-width:760px"></div>
+  <p class="next"><a class="btn primary" href="#test">Далі: тест</a></p>
+</section>
+
+<!-- ===================== TEST ===================== -->
+<section class="view" id="v-test">
+  <div class="prose">
+    <p class="stepno">Крок 4 з 5: тест</p>
+    <h2>Тест за розділом 1</h2>
+    <p class="lead">Професії, дані та бази даних. Лише одна спроба.</p>
+  </div>
+  <div id="testbox"></div>
+</section>
+
+<!-- ===================== TABLES ===================== -->
+<section class="view tview" id="v-tables">
+  <div class="prose"><h2>Таблиці бази даних школи</h2>
+    <p class="lead">Тут видно всі таблиці. Записи, додані через форми, підсвічені жовтим. <a href="#forms">Повернутись до форм</a></p></div>
+  <div class="chips" id="tchips" style="margin-bottom:10px"></div>
+  <p class="note" id="tnote" style="margin:0 0 6px"></p>
+  <div class="rt-wrap" id="tview"></div>
+  <p style="margin-top:14px"><button class="btn small" id="clearAdded" type="button">Видалити всі записи, додані через форми</button></p>
+</section>
+
+<!-- ===================== RESULT ===================== -->
+<section class="view" id="v-result">
+  <div class="report">
+    <div class="prose"><p class="stepno">Крок 5 з 5: результат</p><h2>Мій результат</h2><p class="lead">Коли все виконано, зроби знімок екрана цієї сторінки (з прізвищем і результатом тесту) й надішли вчителю.</p></div>
+    <div id="rep-summary"></div>
+    <div id="resnext" style="margin-top:14px"></div>
+    <h3>Об’єкти, які я створив(-ла)</h3>
+    <div class="objs" id="objs"></div>
+    <p style="margin-top:28px"><button class="btn" id="resetBtn" type="button">Почати практичну частину заново</button></p>
+    <p class="note">Ця кнопка не скидає тест: його можна пройти лише один раз.</p>
+  </div>
+</section>
+
+<!-- ===================== TEACHER (hidden) ===================== -->
+<section class="view" id="v-teacher">
+  <div class="prose"><h2>Для вчителя</h2><p class="lead">Ця сторінка не відображається в меню. Адреса: …/#teacher</p></div>
+  <div class="panel pad" id="teacherbox" style="max-width:640px"></div>
+</section>
+
+</div></main>
+
+<script>
+var DATA = {"Вчителі": [[1, "Коваль", "Ірина", "koval@school.ua", "Інформатика"], [2, "Мороз", "Дмитро", "moroz@school.ua", "Фізкультура"], [3, "Лисенко", "Анна", "lysenko@school.ua", "Музика"], [4, "Савчук", "Наталія", "savchuk@school.ua", "Українська мова"], [5, "Ткаченко", "Олег", "tkachenko@school.ua", "Математика"], [6, "Бойко", "Світлана", "boiko@school.ua", "Англійська мова"], [7, "Гриценко", "Віктор", "hrytsenko@school.ua", "Фізика"], [8, "Остапчук", "Людмила", "ostapchuk@school.ua", "Біологія"]], "Класи": [[1, "9-А", "2026–2027", 1], [2, "9-Б", "2026–2027", 4], [3, "10-А", "2026–2027", 5], [4, "10-Б", "2026–2027", 7]], "Учні": [[1, "Бондаренко", "Андрій", "2010-04-13", 4], [2, "Ващенко", "Марія", "2010-06-19", 4], [3, "Гнатюк", "Олег", "2010-02-09", 4], [4, "Данилюк", "Софія", "2010-08-22", 4], [5, "Іваненко", "Дмитро", "2010-07-28", 4], [6, "Ковальчук", "Анна", "2010-04-19", 3], [7, "Мельник", "Максим", "2010-03-27", 4], [8, "Науменко", "Вікторія", "2010-10-04", 2], [9, "Остапенко", "Ілля", "2010-05-10", 3], [10, "Петренко", "Дарина", "2010-09-10", 2], [11, "Романюк", "Богдан", "2010-12-10", 2], [12, "Савченко", "Юлія", "2010-11-11", 1], [13, "Усенко", "Артем", "2010-06-01", 3], [14, "Федорчук", "Оксана", "2010-11-28", 1], [15, "Харченко", "Владислав", "2010-07-12", 3], [16, "Цимбал", "Аліна", "2011-08-20", 2], [17, "Шевчук", "Назар", "2010-09-09", 1], [18, "Щербак", "Катерина", "2010-01-25", 4], [19, "Юрченко", "Ігор", "2010-05-30", 3], [20, "Яковенко", "Поліна", "2010-05-12", 3], [21, "Гончаренко", "Роман", "2010-11-17", 2], [22, "Дорошенко", "Злата", "2010-10-22", 1], [23, "Зінченко", "Тарас", "2009-10-30", 3], [24, "Кравченко", "Мирослава", "2010-03-22", 3], [25, "Литвиненко", "Єгор", "2010-09-25", 2], [26, "Марченко", "Ангеліна", "2009-10-08", 4], [27, "Олійник", "Кирило", "2010-04-28", 4], [28, "Павленко", "Вероніка", "2011-06-12", 1], [29, "Руденко", "Матвій", "2011-01-30", 2], [30, "Сидоренко", "Ярослава", "2010-03-25", 3], [31, "Тимошенко", "Денис", "2010-05-16", 3], [32, "Фесенко", "Діана", "2010-12-28", 1], [33, "Хоменко", "Данило", "2010-12-01", 1], [34, "Шаповал", "Емілія", "2011-06-06", 1], [35, "Яременко", "Микита", "2011-05-15", 2], [36, "Білик", "Христина", "2011-03-01", 1], [37, "Волошин", "Тимофій", "2010-10-11", 1], [38, "Грищук", "Валерія", "2009-12-30", 4], [39, "Демченко", "Олександр", "2011-02-06", 1], [40, "Захарчук", "Анастасія", "2011-02-07", 2]], "Гуртки": [[1, "Робототехніка", "понеділок", "205", 12, 1], [2, "Шахи", "середа", "112", 16, 5], [3, "Вокал", "п’ятниця", "акт. зал", 20, 3], [4, "Програмування на Python", "вівторок", "205", 14, 1], [5, "Баскетбол", "четвер", "спортзал", 18, 2], [6, "Журналістика", "середа", "301", 15, 4], [7, "3D-моделювання", "четвер", "205", 10, 7], [8, "Англійський клуб", "понеділок", "214", 12, 6], [9, "Театральна студія", "вівторок", "акт. зал", 22, 3], [10, "Волейбол", "п’ятниця", "спортзал", 16, 2], [11, "Екологічний клуб", "середа", "118", 20, 8], [12, "Футбол", "понеділок", "спортзал", 24, 2]], "Записи_на_гуртки": [[1, 27, 8, "2026-09-21"], [2, 35, 3, "2026-09-17"], [3, 10, 5, "2026-09-04"], [4, 18, 10, "2026-09-06"], [5, 31, 10, "2026-09-11"], [6, 28, 12, "2026-09-15"], [7, 38, 10, "2026-09-16"], [8, 22, 8, "2026-09-11"], [9, 11, 8, "2026-09-19"], [10, 8, 5, "2026-09-15"], [11, 5, 11, "2026-09-17"], [12, 36, 6, "2026-09-03"], [13, 8, 2, "2026-09-07"], [14, 30, 6, "2026-09-08"], [15, 36, 2, "2026-09-06"], [16, 18, 1, "2026-09-18"], [17, 40, 1, "2026-09-17"], [18, 3, 8, "2026-09-13"], [19, 32, 12, "2026-09-04"], [20, 19, 6, "2026-09-13"], [21, 24, 7, "2026-09-11"], [22, 7, 5, "2026-09-11"], [23, 38, 8, "2026-09-15"], [24, 16, 10, "2026-09-09"], [25, 33, 1, "2026-09-06"], [26, 26, 1, "2026-09-09"], [27, 34, 2, "2026-09-14"], [28, 39, 7, "2026-09-04"], [29, 13, 9, "2026-09-10"], [30, 35, 6, "2026-09-08"], [31, 18, 2, "2026-09-09"], [32, 8, 12, "2026-09-06"], [33, 6, 7, "2026-09-19"], [34, 15, 10, "2026-09-09"], [35, 25, 6, "2026-09-10"], [36, 24, 1, "2026-09-05"], [37, 17, 12, "2026-09-15"], [38, 9, 8, "2026-09-17"], [39, 37, 8, "2026-09-08"], [40, 34, 10, "2026-09-05"], [41, 28, 6, "2026-09-16"], [42, 1, 11, "2026-09-17"], [43, 4, 3, "2026-09-04"], [44, 20, 6, "2026-09-21"], [45, 33, 3, "2026-09-08"], [46, 34, 9, "2026-09-07"], [47, 21, 10, "2026-09-13"], [48, 22, 5, "2026-09-14"], [49, 39, 2, "2026-09-08"], [50, 37, 10, "2026-09-20"], [51, 12, 12, "2026-09-10"], [52, 20, 7, "2026-09-14"], [53, 25, 7, "2026-09-21"], [54, 4, 8, "2026-09-16"], [55, 27, 4, "2026-09-21"], [56, 16, 4, "2026-09-21"], [57, 6, 12, "2026-09-13"], [58, 23, 9, "2026-09-16"], [59, 26, 3, "2026-09-08"], [60, 22, 10, "2026-09-11"], [61, 29, 11, "2026-09-13"], [62, 23, 1, "2026-09-12"], [63, 2, 8, "2026-09-11"], [64, 30, 8, "2026-09-13"], [65, 2, 7, "2026-09-11"], [66, 17, 5, "2026-09-11"], [67, 14, 8, "2026-09-04"], [68, 31, 1, "2026-09-05"], [69, 3, 2, "2026-09-16"], [70, 12, 8, "2026-09-08"], [71, 20, 12, "2026-09-08"], [72, 25, 10, "2026-09-19"], [73, 32, 4, "2026-09-03"], [74, 40, 2, "2026-09-06"]]};
+/* ===== Query engine (pure functions, no DOM) ===== */
+var QE = (function () {
+  var SCHEMA = {
+    "Вчителі": { fields: ["ID_вчителя", "Прізвище", "Ім’я", "Email", "Предмет"], types: ["num", "text", "text", "text", "text"] },
+    "Класи": { fields: ["ID_класу", "Назва", "Рік_навчання", "ID_вчителя"], types: ["num", "text", "text", "num"] },
+    "Учні": { fields: ["ID_учня", "Прізвище", "Ім’я", "Дата_народження", "ID_класу"], types: ["num", "text", "text", "date", "num"] },
+    "Гуртки": { fields: ["ID_гуртка", "Назва", "День_тижня", "Кабінет", "Кількість_місць", "ID_вчителя"], types: ["num", "text", "text", "text", "num", "num"] },
+    "Записи_на_гуртки": { fields: ["ID_запису", "ID_учня", "ID_гуртка", "Дата_запису"], types: ["num", "num", "num", "date"] }
+  };
+  var TABLE_ORDER = ["Вчителі", "Класи", "Учні", "Гуртки", "Записи_на_гуртки"];
+  var RELATIONS = [
+    ["Класи", "ID_вчителя", "Вчителі", "ID_вчителя"],
+    ["Учні", "ID_класу", "Класи", "ID_класу"],
+    ["Гуртки", "ID_вчителя", "Вчителі", "ID_вчителя"],
+    ["Записи_на_гуртки", "ID_учня", "Учні", "ID_учня"],
+    ["Записи_на_гуртки", "ID_гуртка", "Гуртки", "ID_гуртка"]
+  ];
+  var PK = { "Вчителі": "ID_вчителя", "Класи": "ID_класу", "Учні": "ID_учня", "Гуртки": "ID_гуртка", "Записи_на_гуртки": "ID_запису" };
+  var DATA = null;
+
+  function setData(d) { DATA = d; }
+  function ftype(t, f) { var s = SCHEMA[t]; return s.types[s.fields.indexOf(f)]; }
+  function norm(s) { return String(s).toLowerCase().replace(/['ʼ`’]/g, "’").replace(/\s+/g, " ").trim(); }
+  function fmtDate(iso) { if (!iso) return ""; var p = iso.split("-"); return p[2] + "." + p[1] + "." + p[0]; }
+  function fmtVal(v, type) { if (v === null || v === undefined) return ""; return type === "date" ? fmtDate(v) : String(v); }
+
+  function parseDate(s) {
+    var m = String(s).trim().match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+    if (!m) return null;
+    var d = +m[1], mo = +m[2], y = +m[3];
+    var dt = new Date(Date.UTC(y, mo - 1, d));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+    return y + "-" + String(mo).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+  }
+  function stripQuotes(s) {
+    s = s.trim();
+    var m = s.match(/^["«“'](.*)["»”']$/);
+    return m ? m[1] : s;
+  }
+
+  /* ---- criteria: returns {ok:true, test:function(value)} | {ok:false, error} | {param:"text"} ---- */
+  function parseCrit(raw, type, label) {
+    var s = String(raw || "").trim();
+    if (!s) return null;
+    var pm = s.match(/^\[(.+)\]$/);
+    if (pm) return { param: pm[1].trim() };
+    var parts = s.split(/\s+(?:і|та|and)\s+/i);
+    if (parts.length > 1 && parts.every(function (p) { return /^(>=|<=|<>|>|<|=)/.test(p.trim()); })) {
+      var subs = parts.map(function (p) { return parseOne(p, type, label); });
+      for (var i = 0; i < subs.length; i++) if (!subs[i].ok) return subs[i];
+      return { ok: true, test: function (v) { return subs.every(function (x) { return x.test(v); }); }, sql: subs.map(function (x) { return x.sql; }).join(" AND ") };
+    }
+    return parseOne(s, type, label);
+  }
+  function parseOne(s, type, label) {
+    s = s.trim().replace(/^(like|як)\s+/i, "");
+    var m = s.match(/^(>=|<=|<>|>|<|=)?\s*(.*)$/);
+    var op = m[1] || "=", rawVal = stripQuotes(m[2]);
+    if (rawVal === "") return { ok: false, error: "У стовпці «" + label + "» умова «" + s + "» не має значення після знака." };
+    if (type === "num") {
+      var n = Number(rawVal.replace(",", "."));
+      if (isNaN(n)) return { ok: false, error: "У стовпці «" + label + "» має бути число. Приклад умови: >15 або 12." };
+      return { ok: true, test: function (v) { return cmp(Number(v), n, op); }, sql: op + " " + n };
+    }
+    if (type === "date") {
+      var d = parseDate(rawVal);
+      if (!d) return { ok: false, error: "У стовпці «" + label + "» має бути дата у форматі ДД.ММ.РРРР. Приклад умови: <01.01.2011." };
+      return { ok: true, test: function (v) { return v ? cmp(v, d, op) : false; }, sql: op + " #" + rawVal + "#" };
+    }
+    if (/[*?]/.test(rawVal) && (op === "=" || op === "<>")) {
+      var rx = new RegExp("^" + norm(rawVal).replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
+      var neg = op === "<>";
+      return { ok: true, test: function (v) { var r = rx.test(norm(v)); return neg ? !r : r; }, sql: (neg ? "NOT LIKE '" : "LIKE '") + rawVal + "'" };
+    }
+    var nv = norm(rawVal);
+    return { ok: true, test: function (v) { return cmp(norm(v), nv, op); }, sql: op + " '" + rawVal + "'" };
+  }
+  function cmp(a, b, op) {
+    var c = a < b ? -1 : a > b ? 1 : 0;
+    if (typeof a === "string" && typeof b === "string") c = a.localeCompare(b, "uk");
+    switch (op) { case "=": return c === 0; case "<>": return c !== 0; case ">": return c > 0; case "<": return c < 0; case ">=": return c >= 0; case "<=": return c <= 0; }
+    return false;
+  }
+
+  /* ---- joins ---- */
+  function relationsBetween(a, b) {
+    return RELATIONS.filter(function (r) { return (r[0] === a && r[2] === b) || (r[0] === b && r[2] === a); });
+  }
+  function connectivity(tables) {
+    if (tables.length <= 1) return { ok: true };
+    var seen = [tables[0]], changed = true;
+    while (changed) {
+      changed = false;
+      tables.forEach(function (t) {
+        if (seen.indexOf(t) < 0 && seen.some(function (s) { return relationsBetween(s, t).length; })) { seen.push(t); changed = true; }
+      });
+    }
+    var missing = tables.filter(function (t) { return seen.indexOf(t) < 0; });
+    return missing.length ? { ok: false, missing: missing, joined: seen } : { ok: true };
+  }
+  function joinRows(tables) {
+    var order = [tables[0]], rest = tables.slice(1);
+    while (rest.length) {
+      for (var i = 0; i < rest.length; i++) {
+        if (order.some(function (o) { return relationsBetween(o, rest[i]).length; })) { order.push(rest.splice(i, 1)[0]); break; }
+      }
+    }
+    var rows = DATA[order[0]].map(function (r) { return prefix(order[0], r); });
+    var joins = [];
+    for (var k = 1; k < order.length; k++) {
+      var t = order[k];
+      var rels = [];
+      order.slice(0, k).forEach(function (o) { relationsBetween(o, t).forEach(function (r) { rels.push(r); }); });
+      joins.push({ table: t, rels: rels });
+      var next = [];
+      rows.forEach(function (row) {
+        DATA[t].forEach(function (r2) {
+          var add = prefix(t, r2);
+          var okAll = rels.every(function (rel) {
+            var left = rel[0] + "." + rel[1], right = rel[2] + "." + rel[3];
+            var lv = rel[0] === t ? add[left] : row[left];
+            var rv = rel[2] === t ? add[right] : row[right];
+            return lv === rv;
+          });
+          if (okAll) next.push(Object.assign({}, row, add));
+        });
+      });
+      rows = next;
+    }
+    return { rows: rows, order: order, joins: joins };
+  }
+  function prefix(t, r) {
+    var o = {};
+    SCHEMA[t].fields.forEach(function (f, i) { o[t + "." + f] = r[i]; });
+    return o;
+  }
+
+  /* ---- run ---- */
+  var AGG = { group: "Групування", count: "Кількість", sum: "Сума", avg: "Середнє", min: "Мінімум", max: "Максимум" };
+
+  function colKey(c) { return c.agg && c.agg !== "group" ? (c.agg === "count" ? "count:" + c.t : c.agg + ":" + c.t + "." + c.f) : c.t + "." + c.f; }
+  function colLabel(c) { return c.agg && c.agg !== "group" ? AGG[c.agg] + "(" + c.f + ")" : c.f; }
+
+  function run(q, params) {
+    params = params || {};
+    var tables = q.tables.slice();
+    if (!tables.length) return { error: "Додай у запит хоча б одну таблицю." };
+    var cols = q.cols.filter(function (c) { return c.t && c.f; });
+    if (!cols.length) return { error: "Додай у бланк хоча б одне поле: клікни на назву поля в таблиці." };
+    for (var i = 0; i < cols.length; i++) if (tables.indexOf(cols[i].t) < 0) return { error: "Поле «" + cols[i].f + "» з таблиці «" + cols[i].t + "», а цієї таблиці немає в запиті." };
+    var con = connectivity(tables);
+    if (!con.ok) return { error: "Таблиці " + con.missing.map(q2).join(", ") + " не зв’язані з " + con.joined.map(q2).join(", ") + " напряму. Додай таблицю, яка їх з’єднує (схема зв’язків — під списком таблиць).", notConnected: true };
+
+    var grouped = !!q.group;
+    var whereGroups = [[], []], havingGroups = [[], []], paramsNeeded = [];
+    for (var ci = 0; ci < cols.length; ci++) {
+      var c = cols[ci], type = ftype(c.t, c.f);
+      var isAgg = grouped && c.agg && c.agg !== "group";
+      var aggType = isAgg ? (c.agg === "count" ? "num" : (c.agg === "avg" || c.agg === "sum" ? "num" : type)) : type;
+      [c.crit, c.or].forEach(function (raw, gi) {
+        var p = parseCrit(raw, aggType, colLabel(c));
+        if (!p) return;
+        if (p.param) {
+          paramsNeeded.push(p.param);
+          if (!(p.param in params)) return;
+          var pname = p.param;
+          p = parseCrit(params[pname], aggType, colLabel(c));
+          if (!p) return;
+          if (p.ok) p.sql = "= [" + pname + "]";
+        }
+        if (p.ok === false) { throw { userError: p.error }; }
+        (isAgg ? havingGroups : whereGroups)[gi].push({ key: isAgg ? colKey(c) : c.t + "." + c.f, test: p.test, sql: p.sql, col: c });
+      });
+    }
+    var missingParams = paramsNeeded.filter(function (p, i) { return paramsNeeded.indexOf(p) === i && !(p in params); });
+    if (missingParams.length) return { needParams: missingParams };
+
+    var j = joinRows(tables);
+    var rows = j.rows.filter(function (r) { return passes(whereGroups, r); });
+
+    var outCols = cols;
+    if (grouped) {
+      var gcols = cols.filter(function (c) { return !c.agg || c.agg === "group"; });
+      var map = {}, keys = [];
+      rows.forEach(function (r) {
+        var k = JSON.stringify(gcols.map(function (c) { return r[c.t + "." + c.f]; }));
+        if (!map[k]) { map[k] = []; keys.push(k); }
+        map[k].push(r);
+      });
+      rows = keys.map(function (k) {
+        var grp = map[k], o = {};
+        cols.forEach(function (c) {
+          if (!c.agg || c.agg === "group") { o[c.t + "." + c.f] = grp[0][c.t + "." + c.f]; return; }
+          var vals = grp.map(function (r) { return r[c.t + "." + c.f]; }).filter(function (v) { return v !== null && v !== undefined && v !== ""; });
+          var v;
+          if (c.agg === "count") v = vals.length;
+          else if (c.agg === "sum") v = vals.reduce(function (a, b) { return a + Number(b); }, 0);
+          else if (c.agg === "avg") v = vals.length ? Math.round(vals.reduce(function (a, b) { return a + Number(b); }, 0) / vals.length * 100) / 100 : null;
+          else if (c.agg === "min") v = vals.slice().sort()[0];
+          else if (c.agg === "max") v = vals.slice().sort().reverse()[0];
+          o[colKey(c)] = v;
+        });
+        return o;
+      });
+      rows = rows.filter(function (r) { return passes(havingGroups, r); });
+    }
+
+    var sortCols = cols.filter(function (c) { return c.sort; });
+    if (sortCols.length) {
+      rows.sort(function (a, b) {
+        for (var i = 0; i < sortCols.length; i++) {
+          var c = sortCols[i], k = grouped && c.agg && c.agg !== "group" ? colKey(c) : c.t + "." + c.f;
+          var av = a[k], bv = b[k], r;
+          if (typeof av === "number" && typeof bv === "number") r = av - bv;
+          else r = String(av).localeCompare(String(bv), "uk");
+          if (r) return c.sort === "desc" ? -r : r;
+        }
+        return 0;
+      });
+    }
+    var shown = outCols.filter(function (c) { return c.show !== false; });
+    var header = shown.map(function (c) {
+      var isAgg = grouped && c.agg && c.agg !== "group";
+      return { key: isAgg ? colKey(c) : c.t + "." + c.f, id: grouped ? colKey(c) : c.t + "." + c.f, t: c.t, f: c.f, label: isAgg ? colLabel(c) : c.f, type: isAgg && c.agg === "count" ? "num" : ftype(c.t, c.f) };
+    });
+    var data = rows.map(function (r) { return header.map(function (h) { return r[h.key]; }); });
+    return { header: header, rows: data, sql: toSQL(q, j, whereGroups, havingGroups, params), joinOrder: j.order };
+  }
+  function q2(t) { return "«" + t + "»"; }
+  function passes(groups, r) {
+    var active = groups.filter(function (g) { return g.length; });
+    if (!active.length) return true;
+    return active.some(function (g) { return g.every(function (p) { return p.test(r[p.key]); }); });
+  }
+
+  /* ---- SQL text (Access style) ---- */
+  function id(s) { return /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9_]+$/.test(s) ? s : "[" + s + "]"; }
+  function toSQL(q, j, where, having, params) {
+    var cols = q.cols.filter(function (c) { return c.t && c.f; });
+    var grouped = !!q.group;
+    var sel = cols.filter(function (c) { return c.show !== false; }).map(function (c) {
+      var ref = id(c.t) + "." + id(c.f);
+      if (grouped && c.agg && c.agg !== "group") {
+        var fn = { count: "Count", sum: "Sum", avg: "Avg", min: "Min", max: "Max" }[c.agg];
+        return fn + "(" + ref + ") AS " + id(colLabel(c).replace(/[()]/g, "_").replace(/_$/, ""));
+      }
+      return ref;
+    });
+    var from = id(j.order[0]);
+    j.joins.forEach(function (jn) {
+      from = (j.joins.length > 1 && from.indexOf("JOIN") >= 0 ? "(" + from + ")" : from) + " INNER JOIN " + id(jn.table) + " ON " +
+        jn.rels.map(function (r) { return id(r[0]) + "." + id(r[1]) + " = " + id(r[2]) + "." + id(r[3]); }).join(" AND ");
+    });
+    var sql = "SELECT " + (sel.length ? sel.join(", ") : "*") + "\nFROM " + from;
+    var w = groupSQL(where);
+    if (w) sql += "\nWHERE " + w;
+    if (grouped) {
+      var g = cols.filter(function (c) { return !c.agg || c.agg === "group"; }).map(function (c) { return id(c.t) + "." + id(c.f); });
+      if (g.length) sql += "\nGROUP BY " + g.join(", ");
+      var h = groupSQL(having);
+      if (h) sql += "\nHAVING " + h;
+    }
+    var srt = cols.filter(function (c) { return c.sort; }).map(function (c) {
+      return (grouped && c.agg && c.agg !== "group" ? colLabel(c) : id(c.t) + "." + id(c.f)) + (c.sort === "desc" ? " DESC" : "");
+    });
+    if (srt.length) sql += "\nORDER BY " + srt.join(", ");
+    var paramList = [];
+    q.cols.forEach(function (c) { [c.crit, c.or].forEach(function (x) { var m = String(x || "").trim().match(/^\[(.+)\]$/); if (m) paramList.push("[" + m[1].trim() + "] " + ({ num: "Long", date: "DateTime" }[ftype(c.t, c.f)] || "Text")); }); });
+    if (paramList.length) sql = "PARAMETERS " + paramList.join(", ") + ";\n" + sql;
+    return sql + ";";
+  }
+  function groupSQL(groups) {
+    var parts = groups.filter(function (g) { return g.length; }).map(function (g) {
+      return g.map(function (p) {
+        var ref = p.key.indexOf(":") >= 0 ? colLabel(p.col) : id(p.col.t) + "." + id(p.col.f);
+        return ref + " " + p.sql;
+      }).join(" AND ");
+    });
+    if (!parts.length) return "";
+    return parts.length === 1 ? parts[0] : parts.map(function (p) { return "(" + p + ")"; }).join(" OR ");
+  }
+
+  /* ---- checking ---- */
+  function safeRun(q, params) {
+    try { return run(q, params); } catch (e) { if (e && e.userError) return { error: e.userError }; throw e; }
+  }
+  function check(task, q) {
+    var testParams = task.paramTest || null;
+    if (task.paramField) {
+      var pc = q.cols.find(function (c) { return c.t === task.paramField[0] && c.f === task.paramField[1] && /^\s*\[.+\]\s*$/.test(c.crit || ""); });
+      if (!pc) return { ok: false, msg: "У полі «" + task.paramField[1] + "» таблиці «" + task.paramField[0] + "» умова має бути параметром у квадратних дужках, наприклад: [Введіть назву гуртка]." };
+      var pname = String(pc.crit).trim().slice(1, -1).trim();
+      testParams = {}; testParams[pname] = task.paramValue;
+    }
+    var got = safeRun(q, testParams || {});
+    if (got.error) return { ok: false, msg: got.error };
+    if (got.needParams) return { ok: false, msg: "Запит просить параметр, але це завдання його не потребує. Прибери квадратні дужки з умови." };
+    var expParams = {};
+    if (task.paramField) expParams[task.expectedParamName] = task.paramValue;
+    var exp = safeRun(task.expected, expParams);
+    var gotIds = got.header.map(function (h) { return h.id; }), expIds = exp.header.map(function (h) { return h.id; });
+    var missing = exp.header.filter(function (h) { return gotIds.indexOf(h.id) < 0; });
+    var extra = got.header.filter(function (h) { return expIds.indexOf(h.id) < 0; });
+    if (missing.length || extra.length) {
+      var m = [];
+      if (missing.length) m.push("Бракує поля: " + missing.map(function (h) { return "«" + h.label + "» (" + h.t + ")"; }).join(", ") + ".");
+      if (extra.length) m.push("Зайве поле в результаті: " + extra.map(function (h) { return "«" + h.label + "»"; }).join(", ") + ". Якщо воно потрібне лише для умови — зніми галочку «Показувати».");
+      return { ok: false, msg: m.join(" ") };
+    }
+    var idx = expIds.map(function (k) { return gotIds.indexOf(k); });
+    var gotRows = got.rows.map(function (r) { return JSON.stringify(idx.map(function (i) { return r[i]; })); });
+    var expRows = exp.rows.map(function (r) { return JSON.stringify(r); });
+    if (gotRows.length !== expRows.length) return { ok: false, msg: "Запит знайшов " + gotRows.length + " " + plural(gotRows.length) + ", а має знайти " + expRows.length + ". Перевір умову відбору." };
+    var a = gotRows.slice().sort(), b = expRows.slice().sort();
+    for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return { ok: false, msg: "Кількість записів правильна, але самі записи не ті. Перевір умову відбору й таблиці в запиті." };
+    if (task.sortCheck) {
+      var si = gotIds.indexOf(task.sortCheck.key);
+      var ty = got.header[si].type;
+      for (var k = 1; k < got.rows.length; k++) {
+        var x = got.rows[k - 1][si], y = got.rows[k][si];
+        var r = (typeof x === "number" && typeof y === "number") ? x - y : String(x).localeCompare(String(y), "uk");
+        if (task.sortCheck.dir === "asc" ? r > 0 : r < 0) return { ok: false, msg: "Записи правильні, але порядок не той. Потрібне сортування поля «" + got.header[si].label + "» " + (task.sortCheck.dir === "asc" ? "за зростанням." : "за спаданням.") };
+      }
+    }
+    if (task.paramField) return { ok: true, msg: "Правильно! Запит з параметром працює. Для перевірки його запущено з гуртком «" + task.paramValue + "» — знайдено " + gotRows.length + " " + plural(gotRows.length) + "." };
+    return { ok: true, msg: "Правильно! Запит знайшов " + gotRows.length + " " + plural(gotRows.length) + "." };
+  }
+  function plural(n) {
+    var m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return "запис";
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return "записи";
+    return "записів";
+  }
+
+  return { SCHEMA: SCHEMA, TABLE_ORDER: TABLE_ORDER, RELATIONS: RELATIONS, PK: PK, AGG: AGG, setData: setData, run: safeRun, check: check,
+           ftype: ftype, fmtVal: fmtVal, plural: plural, parseCrit: parseCrit, colKey: colKey };
+})();
+if (typeof module !== "undefined") module.exports = QE;
+
+/* ===== Forms & Reports logic (no DOM). Depends on QE (engine.js). ===== */
+var FR = (function (QE) {
+  var DATA = null;
+  function setData(d) { DATA = d; QE.setData(d); }
+  var SCHEMA = QE.SCHEMA, PK = QE.PK, REL = QE.RELATIONS;
+  var DAYS = ["понеділок", "вівторок", "середа", "четвер", "п’ятниця"];
+
+  var FRIENDLY = {
+    "Класи.Назва": "Клас", "Гуртки.Назва": "Гурток", "Гуртки.День_тижня": "День тижня", "Гуртки.Кількість_місць": "Кількість місць",
+    "Вчителі.Прізвище": "Вчитель", "Вчителі.Ім’я": "Ім’я вчителя", "Учні.Прізвище": "Прізвище", "Учні.Ім’я": "Ім’я",
+    "Учні.Дата_народження": "Дата народження", "Класи.Рік_навчання": "Навчальний рік"
+  };
+  var SUGGEST = { "ID_учня": "Учень", "ID_гуртка": "Гурток", "ID_класу": "Клас", "ID_вчителя": "Вчитель" };
+
+  function normApos(s) { return String(s).replace(/['ʼ`]/g, "’"); }
+  function norm(s) { return normApos(s).toLowerCase().replace(/\s+/g, " ").trim(); }
+  function isPK(t, f) { return PK[t] === f; }
+  function defaultLabel(f) { return f.replace(/_/g, " "); }
+  function colLabel(t, f) { return FRIENDLY[t + "." + f] || defaultLabel(f); }
+  function fkTarget(t, f) { for (var i = 0; i < REL.length; i++) if (REL[i][0] === t && REL[i][1] === f) return REL[i][2]; return null; }
+  function fieldType(t, f) { return QE.ftype(t, f); }
+  function listOpts(s) { return String(s || "").split(/[,;]/).map(function (x) { return normApos(x.trim()); }).filter(Boolean); }
+
+  function parseDate(s) {
+    var m = String(s).trim().match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+    if (!m) return null;
+    var d = +m[1], mo = +m[2], y = +m[3], dt = new Date(Date.UTC(y, mo - 1, d));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+    return y + "-" + String(mo).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+  }
+
+  /* ---------- lookups ---------- */
+  function className(id) { var r = DATA["Класи"].filter(function (x) { return x[0] === id; })[0]; return r ? r[1] : "?"; }
+  function lookupLabel(t, r) {
+    if (t === "Вчителі") return r[1] + " " + r[2];
+    if (t === "Класи") return r[1];
+    if (t === "Учні") return r[1] + " " + r[2] + ", " + className(r[4]);
+    if (t === "Гуртки") return r[1] + " (" + r[2] + ")";
+    return String(r[0]);
+  }
+  function lookupOptions(t) {
+    return DATA[t].map(function (r) { return { id: r[0], label: lookupLabel(t, r) }; }).sort(function (a, b) { return a.label.localeCompare(b.label, "uk"); });
+  }
+  function nextId(t) { return DATA[t].reduce(function (m, r) { return Math.max(m, r[0]); }, 0) + 1; }
+
+  /* ---------- forms ---------- */
+  function ctlOptions(t, f) {
+    if (fkTarget(t, f)) return [["number", "Числове поле (вводити ID вручну)"], ["lookup", "Спадний список із таблиці"]];
+    var ty = fieldType(t, f);
+    if (ty === "num") return [["number", "Числове поле"]];
+    if (ty === "date") return [["date", "Поле дати"]];
+    return [["text", "Текстове поле"], ["list", "Список значень"]];
+  }
+  function newFormDef(t) {
+    var fields = SCHEMA[t].fields.filter(function (f) { return !isPK(t, f); }).map(function (f) {
+      return { f: f, include: true, label: defaultLabel(f), ctl: ctlOptions(t, f)[0][0], req: false, opts: "" };
+    });
+    return { table: t, title: "", fields: fields };
+  }
+  function validateRecord(def, vals) {
+    var t = def.table, S = SCHEMA[t], errors = [], row = [], byF = {};
+    def.fields.forEach(function (f) { byF[f.f] = f; });
+    S.fields.forEach(function (f, i) {
+      if (isPK(t, f)) { row.push(nextId(t)); return; }
+      var fd = byF[f];
+      if (!fd || !fd.include) { row.push(null); return; }
+      var raw = String(vals[f] == null ? "" : vals[f]).trim(), label = fd.label || f, tgt = fkTarget(t, f);
+      if (raw === "") { if (fd.req) errors.push({ f: f, msg: "Поле «" + label + "» обов’язкове — заповни його." }); row.push(null); return; }
+      if (fd.ctl === "lookup") { row.push(Number(raw)); return; }
+      if (fd.ctl === "number") {
+        if (!/^\d+$/.test(raw)) { errors.push({ f: f, msg: "У полі «" + label + "» має бути ціле число." }); row.push(null); return; }
+        var n = Number(raw);
+        if (tgt && !DATA[tgt].some(function (r) { return r[0] === n; })) {
+          errors.push({ f: f, msg: "У таблиці «" + tgt + "» немає запису з ID " + n + ". Так порушується цілісність даних. Щоб такого не траплялось, зроби для цього поля спадний список." });
+          row.push(null); return;
+        }
+        if (f === "Кількість_місць" && n < 1) { errors.push({ f: f, msg: "Кількість місць має бути не менше 1." }); row.push(null); return; }
+        row.push(n); return;
+      }
+      if (fd.ctl === "date") {
+        var d = parseDate(raw);
+        if (!d) { errors.push({ f: f, msg: "У полі «" + label + "» дата має бути у форматі ДД.ММ.РРРР і існувати в календарі (наприклад, 15.03.2011)." }); row.push(null); return; }
+        row.push(d); return;
+      }
+      if (fd.ctl === "list") {
+        var opts = listOpts(fd.opts), hit = opts.filter(function (o) { return norm(o) === norm(raw); })[0];
+        if (!hit) { errors.push({ f: f, msg: "Значення «" + raw + "» немає в списку «" + label + "»." }); row.push(null); return; }
+        row.push(hit); return;
+      }
+      if (f === "Email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) { errors.push({ f: f, msg: "У полі «" + label + "» має бути адреса з символом @, наприклад koval@school.ua." }); row.push(null); return; }
+      row.push(normApos(raw));
+    });
+    if (t === "Записи_на_гуртки" && !errors.length && row[1] != null && row[2] != null) {
+      var dup = DATA[t].some(function (r) { return r[1] === row[1] && r[2] === row[2]; });
+      if (dup) errors.push({ f: "ID_гуртка", msg: "Цей учень уже записаний на цей гурток. Пара «учень + гурток» не може повторюватись." });
+    }
+    return { ok: !errors.length, errors: errors, row: row };
+  }
+  function addRecord(t, row) { DATA[t].push(row); }
+  function describeRecord(def, row) {
+    var t = def.table, S = SCHEMA[t], out = [];
+    def.fields.forEach(function (fd) {
+      if (!fd.include) return;
+      var i = S.fields.indexOf(fd.f), v = row[i], tgt = fkTarget(t, fd.f), txt;
+      if (v == null) txt = "—";
+      else if (tgt) { var rr = DATA[tgt].filter(function (r) { return r[0] === v; })[0]; txt = rr ? lookupLabel(tgt, rr) : String(v); }
+      else txt = QE.fmtVal(v, S.types[i]);
+      out.push({ label: fd.label || fd.f, text: txt });
+    });
+    return out;
+  }
+
+  var FORM_TASKS = {
+    f1: { table: "Учні", saves: 2, fields: { "Прізвище": { ctl: "text", req: true }, "Ім’я": { ctl: "text", req: true }, "Дата_народження": { ctl: "date", req: true }, "ID_класу": { ctl: "lookup", req: true } } },
+    f2: { table: "Гуртки", saves: 2, fields: { "Назва": { ctl: "text", req: true }, "День_тижня": { ctl: "list", req: true, listHas: DAYS }, "Кабінет": { ctl: "text" }, "Кількість_місць": { ctl: "number", req: true }, "ID_вчителя": { ctl: "lookup", req: true } } },
+    f3: { table: "Записи_на_гуртки", saves: 3, fields: { "ID_учня": { ctl: "lookup", req: true }, "ID_гуртка": { ctl: "lookup", req: true }, "Дата_запису": { ctl: "date", req: true } } }
+  };
+  var CTL_MSG = {
+    lookup: function (n) { return "Для поля «" + n + "» обери «Спадний список із таблиці» — тоді користувач не зможе ввести неіснуючий ID."; },
+    list: function (n) { return "Для поля «" + n + "» обери «Список значень» і впиши варіанти через кому."; },
+    number: function (n) { return "Для поля «" + n + "» обери числовий елемент керування."; },
+    date: function (n) { return "Для поля «" + n + "» обери поле дати."; },
+    text: function (n) { return "Для поля «" + n + "» обери текстове поле."; }
+  };
+  function checkFormDef(id, def) {
+    var T = FORM_TASKS[id];
+    if (!T) return { ok: true };
+    if (!def || !def.table) return { ok: false, msg: "Спочатку обери таблицю, на якій будується форма." };
+    if (def.table !== T.table) return { ok: false, msg: "Для цього завдання форма має будуватися на таблиці «" + T.table + "»." };
+    if (!String(def.title || "").trim()) return { ok: false, msg: "Дай формі назву (поле «Назва форми»)." };
+    var byF = {}; def.fields.forEach(function (f) { byF[f.f] = f; });
+    var names = Object.keys(T.fields);
+    for (var i = 0; i < names.length; i++) {
+      var n = names[i], spec = T.fields[n], fd = byF[n];
+      if (!fd || !fd.include) return { ok: false, msg: "Додай у форму поле «" + n + "» (постав галочку «Показувати»)." };
+      if (!String(fd.label || "").trim()) return { ok: false, msg: "У поля «" + n + "» порожній підпис — напиши, що побачить користувач." };
+      if (fd.ctl !== spec.ctl) return { ok: false, msg: CTL_MSG[spec.ctl](n) };
+      if (spec.req && !fd.req) return { ok: false, msg: "Поле «" + n + "» має бути обов’язковим — постав галочку «Обов’язкове»." };
+      if (spec.ctl === "lookup" && /ID/.test(fd.label)) return { ok: false, msg: "Підпис «" + fd.label + "» незрозумілий користувачеві, у ньому є «ID». Перейменуй, наприклад, на «" + (SUGGEST[n] || "Вибір") + "»." };
+      if (spec.listHas) {
+        var have = listOpts(fd.opts).map(norm), miss = spec.listHas.filter(function (d) { return have.indexOf(norm(d)) < 0; });
+        if (miss.length) return { ok: false, msg: "У списку «" + n + "» бракує значень: " + miss.join(", ") + ". Впиши їх через кому." };
+      }
+    }
+    return { ok: true };
+  }
+  function checkFormTask(id, def, saves) {
+    var r = checkFormDef(id, def);
+    if (!r.ok) return r;
+    var need = FORM_TASKS[id].saves, have = saves || 0;
+    if (have < need) {
+      var left = need - have;
+      return { ok: false, msg: "Форма налаштована правильно. Тепер заповни її й натисни «Зберегти запис»: збережено " + have + " з " + need + ", лишилось " + left + "." };
+    }
+    return { ok: true, msg: "Правильно! Форма «" + def.title.trim() + "» працює: через неї додано " + have + " " + (have === 1 ? "запис" : have < 5 ? "записи" : "записів") + " у таблицю «" + def.table + "»." };
+  }
+
+  /* ---------- reports ---------- */
+  function newReportDef() { return { title: "", tables: [], cols: [], group: null, sort: null, count: false, sum: null, date: true }; }
+  function cmp(a, b, type) {
+    if (a == null && b == null) return 0; if (a == null) return 1; if (b == null) return -1;
+    if (type === "num") return Number(a) - Number(b);
+    return String(a).localeCompare(String(b), "uk");
+  }
+  function cmpGroup(a, b, f, type) {
+    if (f === "День_тижня") {
+      var ia = DAYS.map(norm).indexOf(norm(a)), ib = DAYS.map(norm).indexOf(norm(b));
+      if (ia < 0) ia = 99; if (ib < 0) ib = 99; return ia - ib;
+    }
+    return cmp(a, b, type);
+  }
+  function aggText(def) {
+    if (!def.sum) return "";
+    return (def.sum.fn === "avg" ? "Середнє" : "Сума") + " (" + colLabel(def.sum.t, def.sum.f).toLowerCase() + ")";
+  }
+  function aggVal(def, rows, idx) {
+    if (!def.sum) return null;
+    var k = def.sum.t + "." + def.sum.f, vals = rows.map(function (r) { return Number(r[idx[k]]) || 0; });
+    var s = vals.reduce(function (a, b) { return a + b; }, 0);
+    return def.sum.fn === "avg" ? (vals.length ? Math.round(s / vals.length * 10) / 10 : 0) : s;
+  }
+  function buildReport(def) {
+    var cols = def.cols || [];
+    if (!def.tables || !def.tables.length) return { error: "Обери хоча б одну таблицю в блоці «Джерело даних»." };
+    if (!cols.length) return { error: "Додай у звіт хоча б один стовпець: клікни на назву поля вгорі." };
+    var need = [], seen = {};
+    function add(t, f) { var k = t + "." + f; if (!seen[k]) { seen[k] = 1; need.push({ t: t, f: f, show: true }); } }
+    cols.forEach(function (c) { add(c.t, c.f); });
+    if (def.group) add(def.group.t, def.group.f);
+    if (def.sort) add(def.sort.t, def.sort.f);
+    if (def.sum) add(def.sum.t, def.sum.f);
+    var r = QE.run({ tables: def.tables.slice(), cols: need });
+    if (r.error) return { error: r.error };
+    var idx = {}; r.header.forEach(function (h, i) { idx[h.key] = i; });
+    var tp = function (k) { return r.header[idx[k]].type; };
+    var gk = def.group ? def.group.t + "." + def.group.f : null, sk = def.sort ? def.sort.t + "." + def.sort.f : null;
+    var rows = r.rows.slice();
+    rows.sort(function (a, b) {
+      if (gk) { var c = cmpGroup(a[idx[gk]], b[idx[gk]], def.group.f, tp(gk)); if (c) return c; }
+      if (sk) { var c2 = cmp(a[idx[sk]], b[idx[sk]], tp(sk)); if (c2) return def.sort.dir === "desc" ? -c2 : c2; }
+      return 0;
+    });
+    var groups = [];
+    if (gk) rows.forEach(function (row) {
+      var v = row[idx[gk]], g = groups[groups.length - 1];
+      if (!g || g.value !== v) { g = { value: v, rows: [] }; groups.push(g); }
+      g.rows.push(row);
+    });
+    else groups = [{ value: null, rows: rows }];
+    var header = cols.map(function (c) { return { t: c.t, f: c.f, label: (c.label != null && c.label !== "") ? c.label : colLabel(c.t, c.f), type: fieldType(c.t, c.f) }; });
+    var out = groups.map(function (g) {
+      return {
+        value: g.value, label: gk ? QE.fmtVal(g.value, tp(gk)) : null, count: g.rows.length, agg: aggVal(def, g.rows, idx),
+        rows: g.rows.map(function (row) { return cols.map(function (c) { return QE.fmtVal(row[idx[c.t + "." + c.f]], fieldType(c.t, c.f)); }); })
+      };
+    });
+    return { header: header, groups: out, total: rows.length, aggTotal: aggVal(def, rows, idx), groupCaption: def.group ? colLabel(def.group.t, def.group.f) : null, aggLabel: aggText(def) };
+  }
+
+  var REPORT_TASKS = {
+    r1: { tables: ["Учні", "Класи"], cols: ["Учні.Прізвище", "Учні.Ім’я"], extra: ["Класи.Назва", "Учні.Дата_народження"], group: "Класи.Назва", sort: { k: "Учні.Прізвище", dir: "asc" }, count: true, sum: null },
+    r2: { tables: ["Гуртки", "Вчителі"], cols: ["Гуртки.Назва", "Гуртки.День_тижня", "Гуртки.Кабінет"], extra: ["Гуртки.Кількість_місць", "Вчителі.Прізвище", "Вчителі.Ім’я"], group: "Вчителі.Прізвище", sort: { k: "Гуртки.Назва", dir: "asc" }, count: true, sum: "Гуртки.Кількість_місць" },
+    r3: { tables: ["Гуртки", "Записи_на_гуртки", "Учні"], cols: ["Учні.Прізвище", "Учні.Ім’я"], extra: ["Гуртки.Назва", "Учні.Дата_народження"], group: "Гуртки.Назва", sort: { k: "Учні.Прізвище", dir: "asc" }, count: true, sum: null }
+  };
+  function prettyKey(k) { var p = k.split("."); return "«" + p[1].replace(/_/g, " ") + "» (" + p[0] + ")"; }
+  function sameSet(a, b) { return a.length === b.length && a.every(function (x) { return b.indexOf(x) >= 0; }); }
+  function checkReportDef(id, def) {
+    var T = REPORT_TASKS[id];
+    if (!T) return { ok: true };
+    if (!def || !def.tables || !def.tables.length) return { ok: false, msg: "Спочатку обери таблиці в блоці «Джерело даних»." };
+    if (!sameSet(def.tables, T.tables)) return { ok: false, msg: "Для цього звіту потрібні таблиці: " + T.tables.map(function (x) { return "«" + x + "»"; }).join(", ") + ". Зараз у джерелі: " + def.tables.map(function (x) { return "«" + x + "»"; }).join(", ") + "." };
+    if (!String(def.title || "").trim()) return { ok: false, msg: "Дай звіту заголовок (поле «Заголовок звіту»)." };
+    var have = (def.cols || []).map(function (c) { return c.t + "." + c.f; });
+    var miss = T.cols.filter(function (k) { return have.indexOf(k) < 0; });
+    if (miss.length) return { ok: false, msg: "Додай у звіт стовпець: " + miss.map(prettyKey).join(", ") + "." };
+    var extra = have.filter(function (k) { return T.cols.indexOf(k) < 0 && T.extra.indexOf(k) < 0; });
+    if (extra.length) return { ok: false, msg: "У цьому звіті зайвий стовпець: " + extra.map(prettyKey).join(", ") + ". Прибери його кнопкою ×." };
+    if (T.group) {
+      var gk = def.group ? def.group.t + "." + def.group.f : "";
+      if (gk !== T.group) return { ok: false, msg: "Згрупуй звіт за полем " + prettyKey(T.group) + (gk ? ", а зараз групування за " + prettyKey(gk) : " (зараз групування вимкнено)") + "." };
+    } else if (def.group) return { ok: false, msg: "У цьому звіті групування не потрібне — вибери «без групування»." };
+    if (T.sort) {
+      var sk = def.sort ? def.sort.t + "." + def.sort.f : "";
+      if (sk !== T.sort.k) return { ok: false, msg: "Відсортуй записи за полем " + prettyKey(T.sort.k) + "." };
+      if (def.sort.dir !== T.sort.dir) return { ok: false, msg: "Сортування поля " + prettyKey(T.sort.k) + " має бути " + (T.sort.dir === "asc" ? "за зростанням (А → Я)." : "за спаданням.") };
+    }
+    if (T.count && !def.count) return { ok: false, msg: "Додай підсумок «Кількість записів» — постав галочку." };
+    if (T.sum) {
+      var sm = def.sum ? def.sum.t + "." + def.sum.f : "";
+      if (sm !== T.sum) return { ok: false, msg: "Додай підсумок за полем " + prettyKey(T.sum) + ": обери його в списку підсумків." };
+      if (def.sum.fn !== "sum") return { ok: false, msg: "Для поля " + prettyKey(T.sum) + " обери функцію «Сума»." };
+    }
+    var built = buildReport(def);
+    if (built.error) return { ok: false, msg: built.error };
+    return { ok: true, msg: "Правильно! Звіт «" + def.title.trim() + "» готовий: " + built.total + " " + QE.plural(built.total) + (built.groups.length > 1 || def.group ? ", груп: " + built.groups.length : "") + "." };
+  }
+
+  /* ---------- quiz ---------- */
+  var QUIZ = [
+    { q: "Секретар школи щодня вносить у базу даних нових учнів.", a: 0, why: "Вводити й змінювати дані зручно у формі." },
+    { q: "Треба знайти всіх учнів, які народилися до 2010 року.", a: 1, why: "Відбирати записи за умовою — робота запиту." },
+    { q: "Директорові потрібен друкований список гуртків за днями тижня з підсумками.", a: 2, why: "Оформлений для друку результат із групами й підсумками — це звіт." },
+    { q: "Потрібно, щоб при записі на гурток не можна було вибрати неіснуючого учня.", a: 0, why: "Захист від помилок введення забезпечує форма зі спадним списком." }
+  ];
+  var QUIZ_OPTS = ["Форма", "Запит", "Звіт"];
+
+  return { setData: setData, DAYS: DAYS, FRIENDLY: FRIENDLY, colLabel: colLabel, defaultLabel: defaultLabel, isPK: isPK, fkTarget: fkTarget, fieldType: fieldType,
+    ctlOptions: ctlOptions, newFormDef: newFormDef, validateRecord: validateRecord, addRecord: addRecord, describeRecord: describeRecord,
+    lookupOptions: lookupOptions, lookupLabel: lookupLabel, nextId: nextId, listOpts: listOpts, parseDate: parseDate, normApos: normApos,
+    FORM_TASKS: FORM_TASKS, checkFormDef: checkFormDef, checkFormTask: checkFormTask,
+    newReportDef: newReportDef, buildReport: buildReport, REPORT_TASKS: REPORT_TASKS, checkReportDef: checkReportDef, QUIZ: QUIZ, QUIZ_OPTS: QUIZ_OPTS };
+})(typeof QE !== "undefined" ? QE : require("./engine.js"));
+
+
+</script>
+<script>
+(function () {
+  "use strict";
+  FR.setData(DATA);
+  var TABLES = QE.TABLE_ORDER;
+
+  /* ======================= STATE ======================= */
+  var KEY = "final9-project-v1";      /* practice + self-assessment: can be reset */
+  var TKEY = "final9-test-v1";        /* test: one attempt, never reset by the student */
+  var storageOK = (function () { try { var k = "__f9_test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; } catch (e) { return false; } })();
+  function loadState() { try { var s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  var saved = loadState() || {};
+  var st = {
+    name: saved.name || "", done: saved.done || {}, forms: saved.forms || {}, reps: saved.reps || {}, saves: saved.saves || {},
+    added: saved.added || {}, objs: saved.objs || { forms: {}, reports: {} },
+    self: saved.self || {}, plan: saved.plan || { best: "", improve: "" },
+    ft: saved.ft || "f1", rt: saved.rt || "r1", tv: saved.tv || "Учні"
+  };
+  Object.keys(st.added).forEach(function (t) { if (DATA[t]) st.added[t].forEach(function (r) { DATA[t].push(r); }); });
+  function persist() {
+    if (!storageOK) return;
+    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { storageOK = false; warnStorage(); }
+  }
+  function warnStorage() { var w = document.getElementById("storewarn"); if (w) w.classList.add("on"); }
+  if (!storageOK) warnStorage();
+  window.addEventListener("pagehide", persist);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) persist(); });
+
+/* ======================= HELPERS ======================= */
+  function $(id) { return document.getElementById(id); }
+  function el(tag, a, kids) {
+    var e = document.createElement(tag);
+    if (a) for (var k in a) {
+      var v = a[k];
+      if (k === "text") e.textContent = v;
+      else if (k === "html") e.innerHTML = v;
+      else if (k.indexOf("on") === 0) e.addEventListener(k.slice(2), v);
+      else if (k === "value" || k === "checked" || k === "disabled" || k === "selected") e[k] = v;
+      else if (v !== false && v != null) e.setAttribute(k, v);
+    }
+    (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function today() { var d = new Date(); return String(d.getDate()).padStart(2, "0") + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + d.getFullYear(); }
+  function fmtNum(n) { return Number(n).toLocaleString("uk-UA", { maximumFractionDigits: 1 }); }
+  function nowIso() { return new Date().toISOString(); }
+
+  $("who").value = st.name || "";
+  $("who").addEventListener("input", function () { st.name = $("who").value; persist(); });
+
+  
+  /* ======================= ROUTING ======================= */
+  var VIEWS = ["start", "forms", "reports", "self", "test", "result", "tables", "teacher"];
+  var hooks = {};
+  function route() {
+    var v = (location.hash || "").slice(1), has = VIEWS.indexOf(v) >= 0;
+    if (!has) v = "start";
+    VIEWS.forEach(function (x) { $("v-" + x).classList.toggle("on", x === v); });
+    document.querySelectorAll("nav.tabs a").forEach(function (a) { if (a.dataset.view === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    if (hooks[v]) hooks[v]();
+    if (has) window.scrollTo({ top: document.querySelector("nav.tabs").offsetTop - 1 });
+  }
+  window.addEventListener("hashchange", route);
+
+  /* ======================= TASK DEFINITIONS ======================= */
+  var FTASKS = [
+    { id: "f1", title: "Форма «Новий учень»",
+      text: "Створи форму «Новий учень» для таблиці «Учні»: прізвище, ім’я, дата народження й клас. Усі чотири поля обов’язкові, клас вибирають зі списку, а підпис поля класу має бути зрозумілим, без «ID». Заповни форму й збережи через неї 2 учнів.",
+      hint: "Обери таблицю «Учні». Для поля ID_класу зміни елемент керування на «Спадний список із таблиці» й перейменуй підпис на «Клас». Познач усі поля обов’язковими й напиши назву форми. Дату вводь у форматі ДД.ММ.РРРР, наприклад 15.03.2011." },
+    { id: "f2", title: "Форма «Новий гурток»",
+      text: "Створи форму «Новий гурток» для таблиці «Гуртки». Назва, день тижня, кількість місць і вчитель — обов’язкові, кабінет — за бажанням. День тижня — список значень (понеділок, вівторок, середа, четвер, п’ятниця), кількість місць — число, вчителя вибирають зі списку. Збережи через форму 2 гуртки.",
+      hint: "Для поля День_тижня вибери «Список значень» і впиши в нове поле варіанти через кому. Для ID_вчителя використай спадний список з підписом «Вчитель». Усі поля, крім кабінету, познач обов’язковими." },
+    { id: "f3", bonus: true, title: "Форма «Запис на гурток»",
+      text: "Додаткове завдання. Створи форму «Запис на гурток» для таблиці «Записи_на_гуртки»: учня й гурток вибирають зі списків, дату запису вводять вручну. Усі три поля обов’язкові. Збережи через форму 3 записи.",
+      hint: "Для ID_учня й ID_гуртка обери спадні списки й дай їм підписи «Учень» і «Гурток». Дату вводь як 15.10.2026. Пара «учень + гурток» не може повторюватись." },
+    { id: "f0", sandbox: true, title: "Пісочниця", text: "Вільне місце без перевірки: будуй форму на будь-якій таблиці, пробуй різні елементи керування й дивись, як форма не пропускає помилки." }
+  ];
+  var RTASKS = [
+    { id: "r1", title: "Звіт «Учні за класами»",
+      text: "Створи звіт «Учні за класами»: покажи прізвище та ім’я, згрупуй учнів за назвою класу, відсортуй за прізвищем і додай підсумок кількості (для кожного класу й загальний).",
+      hint: "У таблиці «Учні» немає назви класу, тож додай у джерело ще й «Класи». Групувати треба за полем «Назва» таблиці «Класи» — воно не обов’язково має бути стовпцем звіту." },
+    { id: "r2", title: "Звіт «Гуртки за вчителями»",
+      text: "Створи звіт «Гуртки за вчителями»: стовпці — назва гуртка, день тижня й кабінет. Згрупуй за прізвищем вчителя, відсортуй за назвою гуртка. Додай кількість записів і суму місць (для кожного вчителя й загальну).",
+      hint: "Потрібні таблиці «Гуртки» і «Вчителі». Групування — за полем «Прізвище» таблиці «Вчителі». У підсумках постав «Кількість записів» і обери для поля «Кількість місць» функцію «Сума»." },
+    { id: "r3", bonus: true, title: "Звіт «Хто в яких гуртках»",
+      text: "Додаткове завдання. Створи звіт «Хто в яких гуртках»: для кожного гуртка перелічи прізвища й імена записаних учнів за абеткою та порахуй їх.",
+      hint: "Гуртки й учні пов’язані через проміжну таблицю «Записи_на_гуртки» — додай усі три таблиці. Групуй за назвою гуртка." },
+    { id: "r0", sandbox: true, title: "Пісочниця", text: "Вільне місце без перевірки: збирай будь-який звіт, пробуй групування, сортування, підсумки й дивись попередній перегляд." }
+  ];
+  function findTask(list, id) { return list.filter(function (t) { return t.id === id; })[0] || list[0]; }
+  var lastFb = {};
+  function addRetry(card, t) {
+    var isForm = t.id.charAt(0) === "f";
+    card.appendChild(el("button", { class: "btn small retry", type: "button", text: "Почати це завдання спочатку", onclick: function () {
+      if (isForm) { delete st.forms[t.id]; st.saves[t.id] = 0; } else { delete st.reps[t.id]; }
+      delete lastFb[t.id]; persist();
+      if (isForm) renderForms(); else renderReports();
+    } }));
+  }
+
+/* ======================= FORMS ======================= */
+  function fdef() { return st.forms[st.ft] || null; }
+
+  function renderFTasks() {
+    var box = $("ftasks"); box.innerHTML = "";
+    var nums = el("div", { class: "tnums" });
+    FTASKS.forEach(function (t, i) {
+      var b = el("button", { type: "button", "aria-pressed": String(st.ft === t.id), text: t.sandbox ? "Пісочниця" : String(i + 1),
+        "aria-label": t.sandbox ? "Пісочниця" : "Завдання " + (i + 1) + (st.done[t.id] ? ", виконано" : "") + (t.bonus ? ", додаткове" : ""),
+        onclick: function () { st.ft = t.id; persist(); renderForms(); } });
+      if (st.done[t.id]) b.classList.add("done");
+      if (t.bonus) b.classList.add("bonus");
+      nums.appendChild(b);
+    });
+    box.appendChild(nums);
+    var t = findTask(FTASKS, st.ft), idx = FTASKS.indexOf(t), card = el("div", { class: "task" });
+    card.appendChild(el("h3", { text: t.sandbox ? t.title : "Завдання " + (idx + 1) + ". " + t.title }));
+    card.appendChild(el("p", { class: "meta", text: t.sandbox ? "Без перевірки" : t.bonus ? (st.done[t.id] ? "Додаткове завдання — виконано" : "Додаткове завдання") : (st.done[t.id] ? "Виконано" : "Ще не виконано") }));
+    if (!t.sandbox && st.done[t.id]) card.appendChild(el("div", { class: "stamp-row" }, [el("span", { class: "stamp-done", text: "Виконано" })]));
+    card.appendChild(el("p", { text: t.text }));
+    var spec = FR.FORM_TASKS[t.id];
+    if (spec) card.appendChild(el("p", { class: "counter", text: "Збережено через цю форму: " + Math.min(st.saves[t.id] || 0, 99) + " з " + spec.saves }));
+    if (!t.sandbox) {
+      card.appendChild(el("details", { class: "hint" }, [el("summary", { text: "Підказка" }), el("p", { text: t.hint })]));
+      var fb = el("div", { class: "feedback", role: "status" });
+      var lf = lastFb[t.id]; if (lf) { fb.className = "feedback " + (lf.ok ? "ok" : "bad"); fb.textContent = lf.msg; }
+      card.appendChild(el("button", { class: "btn primary", type: "button", text: "Перевірити завдання", onclick: function () {
+        var d = fdef(), r = FR.checkFormTask(t.id, d, st.saves[t.id] || 0);
+        lastFb[t.id] = r;
+        if (r.ok) { st.done[t.id] = st.done[t.id] || nowIso(); st.objs.forms[t.id] = d.title.trim(); persist(); }
+        renderFTasks();
+      } }));
+      card.appendChild(fb); addRetry(card, t);
+    }
+    box.appendChild(card);
+  }
+
+  function renderFPick() {
+    var box = $("fpick"); box.innerHTML = ""; var d = fdef();
+    TABLES.forEach(function (t) {
+      box.appendChild(el("button", { type: "button", class: "chip", "aria-pressed": String(!!d && d.table === t), text: t, onclick: function () { pickFormTable(t); } }));
+    });
+    $("fpicknote").style.display = d ? "none" : "block";
+    $("ftitle").disabled = !d; $("ftitle").value = d ? d.title : "";
+  }
+  function pickFormTable(t) {
+    var d = fdef(); if (d && d.table === t) return;
+    var nd = FR.newFormDef(t); if (d) nd.title = d.title;
+    st.forms[st.ft] = nd; persist();
+    renderFPick(); renderFFields(); renderFPreview();
+  }
+  $("ftitle").addEventListener("input", function () { var d = fdef(); if (!d) return; d.title = $("ftitle").value; persist(); renderFPreview(); });
+
+  function renderFFields() {
+    var box = $("ffields"); box.innerHTML = ""; var d = fdef();
+    if (!d) { box.appendChild(el("p", { class: "empty", style: "padding:0 16px 16px", text: "Спершу обери таблицю вгорі." })); return; }
+    var tbl = el("table", { class: "ftable" });
+    tbl.appendChild(el("thead", null, [el("tr", null, [el("th", { text: "Показувати" }), el("th", { text: "Поле в таблиці" }), el("th", { text: "Підпис у формі" }), el("th", { text: "Елемент керування" }), el("th", { text: "Обов’язкове" })])]));
+    var tb = el("tbody"), pk = QE.PK[d.table];
+    tb.appendChild(el("tr", { class: "pk-row" }, [el("td", { text: "—" }), el("td", null, [el("span", { class: "fname", text: pk }), el("span", { class: "fk", text: "первинний ключ" })]),
+      el("td", { colspan: "3", text: "Автонумерація: номер запису присвоюється автоматично, у формі його вводити не треба." })]));
+    d.fields.forEach(function (fd) {
+      var tr = el("tr", { class: fd.include ? "" : "off" });
+      var inc = el("input", { type: "checkbox", checked: fd.include, "aria-label": "Показувати поле " + fd.f, onchange: function (e) { fd.include = e.target.checked; persist(); tr.classList.toggle("off", !fd.include); renderFPreview(); } });
+      tr.appendChild(el("td", null, [inc]));
+      var tgt = FR.fkTarget(d.table, fd.f);
+      tr.appendChild(el("td", null, [el("span", { class: "fname", text: fd.f }), tgt ? el("span", { class: "fk", text: "зовнішній ключ → " + tgt }) : null]));
+      var lab = el("input", { type: "text", value: fd.label, "aria-label": "Підпис для поля " + fd.f, oninput: function (e) { fd.label = e.target.value; persist(); renderFPreview(); } });
+      tr.appendChild(el("td", null, [lab]));
+      var opts = FR.ctlOptions(d.table, fd.f), sel = el("select", { "aria-label": "Елемент керування для поля " + fd.f,
+        onchange: function (e) { fd.ctl = e.target.value; persist(); renderFFields(); renderFPreview(); } });
+      opts.forEach(function (o) { var op = el("option", { value: o[0], text: o[1] }); if (o[0] === fd.ctl) op.selected = true; sel.appendChild(op); });
+      var cell = el("td", null, [sel]);
+      if (fd.ctl === "list") cell.appendChild(el("input", { type: "text", value: fd.opts || "", placeholder: "значення через кому", "aria-label": "Значення списку для " + fd.f, style: "margin-top:6px",
+        oninput: function (e) { fd.opts = e.target.value; persist(); renderFPreview(); } }));
+      if (tgt && fd.ctl === "number") cell.appendChild(el("span", { class: "warn", text: "⚠ користувач може ввести неіснуючий ID" }));
+      if (fd.ctl === "list" && !FR.listOpts(fd.opts).length) cell.appendChild(el("span", { class: "warn", text: "⚠ додай значення списку" }));
+      tr.appendChild(cell);
+      var req = el("input", { type: "checkbox", checked: fd.req, "aria-label": "Обов’язкове поле " + fd.f, onchange: function (e) { fd.req = e.target.checked; persist(); renderFPreview(); } });
+      tr.appendChild(el("td", null, [req]));
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb); box.appendChild(tbl);
+  }
+
+  /* ----- form card (used by builder preview and by the example) ----- */
+  function buildFormCard(def, prefix, interactive) {
+    var card = el("div", { class: "paperform" });
+    card.appendChild(el("div", { class: "pf-head" }, [el("div", { class: "pf-title", text: (def.title || "").trim() ? def.title : "Назва форми" }), el("div", { class: "pf-sub", text: "Джерело: таблиця «" + def.table + "»" })]));
+    var body = el("div", { class: "pf-body" }), inputs = {}, errs = {};
+    body.appendChild(el("p", { class: "autonum", text: QE.PK[def.table] + ": " + FR.nextId(def.table) + " (присвоюється автоматично)" }));
+    var inc = def.fields.filter(function (f) { return f.include; });
+    if (!inc.length) body.appendChild(el("p", { class: "autonum", text: "У формі немає полів. Познач хоча б одне поле галочкою «Показувати»." }));
+    inc.forEach(function (fd) {
+      var id = prefix + fd.f, wrap = el("div", { class: "ff" }), ctl;
+      wrap.appendChild(el("label", { for: id }, [fd.label || fd.f, fd.req ? el("span", { class: "req", text: " *" }) : null]));
+      if (fd.ctl === "lookup") {
+        ctl = el("select", { id: id }); ctl.appendChild(el("option", { value: "", text: "— оберіть —" }));
+        FR.lookupOptions(FR.fkTarget(def.table, fd.f)).forEach(function (o) { ctl.appendChild(el("option", { value: String(o.id), text: o.label })); });
+      } else if (fd.ctl === "list") {
+        ctl = el("select", { id: id }); ctl.appendChild(el("option", { value: "", text: "— оберіть —" }));
+        FR.listOpts(fd.opts).forEach(function (o) { ctl.appendChild(el("option", { value: o, text: o })); });
+      } else {
+        ctl = el("input", { id: id, type: "text", autocomplete: "off", inputmode: fd.ctl === "number" ? "numeric" : "text", placeholder: fd.ctl === "date" ? "ДД.ММ.РРРР" : "" });
+      }
+      if (!interactive) ctl.disabled = true;
+      var er = el("div", { class: "ferr", id: id + "-err" });
+      inputs[fd.f] = ctl; errs[fd.f] = er; wrap.appendChild(ctl); wrap.appendChild(er); body.appendChild(wrap);
+    });
+    card.appendChild(body);
+    var msg = el("div", { class: "pf-msg", role: "status" });
+    var api = { card: card, inputs: inputs, errs: errs, msg: msg };
+    api.vals = function () { var o = {}; Object.keys(inputs).forEach(function (k) { o[k] = inputs[k].value; }); return o; };
+    api.clear = function () { Object.keys(inputs).forEach(function (k) { inputs[k].value = ""; inputs[k].removeAttribute("aria-invalid"); errs[k].textContent = ""; }); msg.className = "pf-msg"; msg.innerHTML = ""; };
+    if (interactive) {
+      var foot = el("div", { class: "pf-foot" }, [
+        el("button", { class: "pf-btn", type: "button", id: prefix + "save", text: "Зберегти запис", onclick: function () { saveRecord(api); } }),
+        el("button", { class: "pf-btn sec", type: "button", text: "Очистити", onclick: function () { api.clear(); } })]);
+      card.appendChild(foot);
+      Object.keys(inputs).forEach(function (k) { inputs[k].addEventListener("keydown", function (e) { if (e.key === "Enter" && inputs[k].tagName === "INPUT") saveRecord(api); }); });
+    }
+    card.appendChild(msg);
+    return api;
+  }
+  var currentCard = null;
+  function renderFPreview(flash) {
+    var box = $("fpreview"); box.innerHTML = ""; var d = fdef();
+    if (!d) { box.appendChild(el("p", { class: "empty", text: "Обери таблицю — тут з’явиться форма." })); currentCard = null; return; }
+    currentCard = buildFormCard(d, "ff-", true);
+    box.appendChild(currentCard.card);
+    if (flash) { currentCard.msg.className = "pf-msg " + (flash.ok ? "ok" : "bad"); currentCard.msg.innerHTML = flash.html; }
+  }
+  function saveRecord(api) {
+    var d = fdef(); if (!d) return;
+    var v = FR.validateRecord(d, api.vals());
+    Object.keys(api.inputs).forEach(function (k) { api.inputs[k].removeAttribute("aria-invalid"); api.errs[k].textContent = ""; });
+    if (!v.ok) {
+      var first = null;
+      v.errors.forEach(function (e) { var inp = api.inputs[e.f]; if (!inp) return; inp.setAttribute("aria-invalid", "true"); api.errs[e.f].textContent = e.msg; if (!first) first = inp; });
+      var ne = v.errors.length, w = (ne % 10 === 1 && ne % 100 !== 11) ? "помилку" : (ne % 10 >= 2 && ne % 10 <= 4 && (ne % 100 < 12 || ne % 100 > 14)) ? "помилки" : "помилок";
+      api.msg.className = "pf-msg bad"; api.msg.textContent = "Запис не збережено — виправ " + ne + " " + w + " у формі.";
+      if (first) first.focus();
+      return;
+    }
+    FR.addRecord(d.table, v.row);
+    (st.added[d.table] = st.added[d.table] || []).push(v.row);
+    var t = findTask(FTASKS, st.ft), counted = false;
+    if (FR.FORM_TASKS[t.id] && FR.checkFormDef(t.id, d).ok) { st.saves[t.id] = (st.saves[t.id] || 0) + 1; counted = true; }
+    persist();
+    var desc = FR.describeRecord(d, v.row).map(function (x) { return "<li>" + escHtml(x.label) + ": <b>" + escHtml(x.text) + "</b></li>"; }).join("");
+    var html = "✓ Запис №" + v.row[0] + " додано в таблицю «" + escHtml(d.table) + "».<ul>" + desc + "</ul>" +
+      (FR.FORM_TASKS[t.id] && !counted ? "<div>Цей запис не зараховано в завдання: форма ще не налаштована за умовою. Натисни «Перевірити завдання», щоб побачити, що виправити.</div>" : "");
+    renderFTasks(); renderFPreview({ ok: true, html: html });
+  }
+  function escHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function renderForms() { renderFTasks(); renderFPick(); renderFFields(); renderFPreview(); }
+  hooks.forms = function () { renderFTasks(); renderFPreview(); };
+
+  /* ======================= REPORTS ======================= */
+  function rdef() { if (!st.reps[st.rt]) st.reps[st.rt] = FR.newReportDef(); return st.reps[st.rt]; }
+  function selFields(d) {
+    var out = []; d.tables.forEach(function (t) { QE.SCHEMA[t].fields.forEach(function (f) { out.push({ t: t, f: f }); }); }); return out;
+  }
+  function fieldText(d, o) { return (d.tables.length > 1 ? o.t + " · " : "") + FR.defaultLabel(o.f); }
+  function encodeF(o) { return o ? o.t + "|" + o.f : ""; }
+  function decodeF(s) { if (!s) return null; var p = s.split("|"); return { t: p[0], f: p[1] }; }
+
+  function renderRTasks() {
+    var box = $("rtasks"); box.innerHTML = "";
+    var nums = el("div", { class: "tnums" });
+    RTASKS.forEach(function (t, i) {
+      var b = el("button", { type: "button", "aria-pressed": String(st.rt === t.id), text: t.sandbox ? "Пісочниця" : String(i + 1),
+        "aria-label": t.sandbox ? "Пісочниця" : "Завдання " + (i + 1) + (st.done[t.id] ? ", виконано" : "") + (t.bonus ? ", додаткове" : ""),
+        onclick: function () { st.rt = t.id; persist(); renderReports(); } });
+      if (st.done[t.id]) b.classList.add("done");
+      if (t.bonus) b.classList.add("bonus");
+      nums.appendChild(b);
+    });
+    box.appendChild(nums);
+    var t = findTask(RTASKS, st.rt), idx = RTASKS.indexOf(t), card = el("div", { class: "task" });
+    card.appendChild(el("h3", { text: t.sandbox ? t.title : "Завдання " + (idx + 1) + ". " + t.title }));
+    card.appendChild(el("p", { class: "meta", text: t.sandbox ? "Без перевірки" : t.bonus ? (st.done[t.id] ? "Додаткове завдання — виконано" : "Додаткове завдання") : (st.done[t.id] ? "Виконано" : "Ще не виконано") }));
+    if (!t.sandbox && st.done[t.id]) card.appendChild(el("div", { class: "stamp-row" }, [el("span", { class: "stamp-done", text: "Виконано" })]));
+    card.appendChild(el("p", { text: t.text }));
+    if (!t.sandbox) {
+      card.appendChild(el("details", { class: "hint" }, [el("summary", { text: "Підказка" }), el("p", { text: t.hint })]));
+      var fb = el("div", { class: "feedback", role: "status" });
+      var lf = lastFb[t.id]; if (lf) { fb.className = "feedback " + (lf.ok ? "ok" : "bad"); fb.textContent = lf.msg; }
+      card.appendChild(el("button", { class: "btn primary", type: "button", text: "Перевірити завдання", onclick: function () {
+        var d = rdef(), r = FR.checkReportDef(t.id, d); lastFb[t.id] = r;
+        if (r.ok) { st.done[t.id] = st.done[t.id] || nowIso(); st.objs.reports[t.id] = d.title.trim(); persist(); }
+        renderRTasks();
+      } }));
+      card.appendChild(fb); addRetry(card, t);
+    }
+    box.appendChild(card);
+  }
+
+  function renderRPick() {
+    var d = rdef(), box = $("rpick"); box.innerHTML = "";
+    TABLES.forEach(function (t) {
+      box.appendChild(el("button", { type: "button", class: "chip", "aria-pressed": String(d.tables.indexOf(t) >= 0), text: t, onclick: function () { toggleRTable(t); } }));
+    });
+    var fb = $("rfields"); fb.innerHTML = "";
+    d.tables.forEach(function (t) {
+      var b = el("div", { class: "fbox" }, [el("h4", { text: t })]);
+      QE.SCHEMA[t].fields.forEach(function (f) {
+        var on = d.cols.some(function (c) { return c.t === t && c.f === f; });
+        b.appendChild(el("button", { type: "button", class: f.indexOf("ID_") === 0 ? "k" : "", "aria-pressed": String(on), title: on ? "Прибрати зі звіту" : "Додати у звіт",
+          onclick: function () { toggleRCol(t, f); } }, [el("span", { text: f }), el("span", { text: on ? "✓" : "+" })]));
+      });
+      fb.appendChild(b);
+    });
+    $("rpicknote").style.display = d.tables.length ? "none" : "block";
+    $("rtitle").value = d.title || "";
+  }
+  function toggleRTable(t) {
+    var d = rdef(), i = d.tables.indexOf(t);
+    if (i >= 0) {
+      d.tables.splice(i, 1);
+      d.cols = d.cols.filter(function (c) { return c.t !== t; });
+      if (d.group && d.group.t === t) d.group = null;
+      if (d.sort && d.sort.t === t) d.sort = null;
+      if (d.sum && d.sum.t === t) d.sum = null;
+    } else d.tables.push(t);
+    persist(); renderRPick(); renderRCols(); renderRSettings(); renderRPaper();
+  }
+  function toggleRCol(t, f) {
+    var d = rdef(), i = -1;
+    d.cols.forEach(function (c, k) { if (c.t === t && c.f === f) i = k; });
+    if (i >= 0) d.cols.splice(i, 1); else d.cols.push({ t: t, f: f, label: FR.colLabel(t, f) });
+    persist(); renderRPick(); renderRCols(); renderRPaper();
+  }
+  $("rtitle").addEventListener("input", function () { var d = rdef(); d.title = $("rtitle").value; persist(); renderRPaper(); });
+
+  function renderRCols() {
+    var d = rdef(), box = $("rcols"); box.innerHTML = "";
+    if (!d.cols.length) { box.appendChild(el("p", { class: "empty", text: "Стовпців поки немає — клікни на поле вгорі." })); return; }
+    d.cols.forEach(function (c, i) {
+      var row = el("div", { class: "col-row" });
+      var mv = el("span", null, [
+        el("button", { type: "button", "aria-label": "Підняти стовпець вище", text: "↑", disabled: i === 0, onclick: function () { var x = d.cols.splice(i, 1)[0]; d.cols.splice(i - 1, 0, x); persist(); renderRCols(); renderRPaper(); } }),
+        el("button", { type: "button", "aria-label": "Опустити стовпець нижче", text: "↓", disabled: i === d.cols.length - 1, onclick: function () { var x = d.cols.splice(i, 1)[0]; d.cols.splice(i + 1, 0, x); persist(); renderRCols(); renderRPaper(); } })]);
+      var lab = el("input", { type: "text", value: c.label, "aria-label": "Підпис стовпця " + c.f, oninput: function (e) { c.label = e.target.value; persist(); renderRPaper(); } });
+      row.appendChild(mv); row.appendChild(lab); row.appendChild(el("small", { text: c.t + "." + c.f }));
+      row.appendChild(el("button", { type: "button", "aria-label": "Прибрати стовпець " + c.f, text: "×", onclick: function () { d.cols.splice(i, 1); persist(); renderRPick(); renderRCols(); renderRPaper(); } }));
+      box.appendChild(row);
+    });
+  }
+
+  function renderRSettings() {
+    var d = rdef(), box = $("rsettings"); box.innerHTML = "";
+    if (!d.tables.length) { box.appendChild(el("p", { class: "empty", text: "Обери таблиці, щоб налаштувати групування, сортування й підсумки." })); return; }
+    var all = selFields(d);
+    function fieldSelect(cur, none, onch, filter) {
+      var s = el("select", { onchange: function (e) { onch(decodeF(e.target.value)); } });
+      s.appendChild(el("option", { value: "", text: none }));
+      all.filter(filter || function () { return true; }).forEach(function (o) { var op = el("option", { value: encodeF(o), text: fieldText(d, o) }); if (cur && cur.t === o.t && cur.f === o.f) op.selected = true; s.appendChild(op); });
+      return s;
+    }
+    var g = el("div", null, [el("label", { class: "l", text: "Групувати за" }), fieldSelect(d.group, "— без групування —", function (v) { d.group = v; persist(); renderRPaper(); })]);
+    var dirSel = el("select", { "aria-label": "Напрям сортування", onchange: function (e) { if (d.sort) { d.sort.dir = e.target.value; persist(); renderRPaper(); } } });
+    [["asc", "А → Я (за зростанням)"], ["desc", "Я → А (за спаданням)"]].forEach(function (o) { var op = el("option", { value: o[0], text: o[1] }); if (d.sort && d.sort.dir === o[0]) op.selected = true; dirSel.appendChild(op); });
+    var sortSel = fieldSelect(d.sort, "— без сортування —", function (v) { d.sort = v ? { t: v.t, f: v.f, dir: (d.sort && d.sort.dir) || "asc" } : null; persist(); renderRPaper(); });
+    var s = el("div", null, [el("label", { class: "l", text: "Сортувати за" }), el("div", { class: "two" }, [sortSel, dirSel])]);
+    var cnt = el("input", { type: "checkbox", checked: !!d.count, id: "r-count", onchange: function (e) { d.count = e.target.checked; persist(); renderRPaper(); } });
+    var dt = el("input", { type: "checkbox", checked: !!d.date, id: "r-date", onchange: function (e) { d.date = e.target.checked; persist(); renderRPaper(); } });
+    var sumSel = fieldSelect(d.sum, "— без підсумку за полем —", function (v) { d.sum = v ? { t: v.t, f: v.f, fn: (d.sum && d.sum.fn) || "sum" } : null; persist(); renderRPaper(); },
+      function (o) { return QE.ftype(o.t, o.f) === "num" && o.f.indexOf("ID_") !== 0; });
+    var fnSel = el("select", { "aria-label": "Функція підсумку", onchange: function (e) { if (d.sum) { d.sum.fn = e.target.value; persist(); renderRPaper(); } } });
+    [["sum", "Сума"], ["avg", "Середнє"]].forEach(function (o) { var op = el("option", { value: o[0], text: o[1] }); if (d.sum && d.sum.fn === o[0]) op.selected = true; fnSel.appendChild(op); });
+    var tot = el("div", null, [el("label", { class: "l", text: "Підсумки" }),
+      el("label", { class: "check", for: "r-count" }, [cnt, "Кількість записів"]),
+      el("div", { class: "two", style: "margin-top:6px" }, [sumSel, fnSel])]);
+    var ft = el("div", null, [el("label", { class: "l", text: "Колонтитул" }), el("label", { class: "check", for: "r-date" }, [dt, "Дата друку"])]);
+    [g, s, tot, ft].forEach(function (x) { box.appendChild(x); });
+  }
+
+  function paperEl(d, b, opts) {
+    var paper = el("div", { class: "paper" });
+    paper.appendChild(el("div", { class: "p-head" }, [el("h2", { text: (d.title || "").trim() ? d.title : "Заголовок звіту" }), d.date ? el("div", { class: "p-date", text: "Дата друку: " + today() }) : null]));
+    if (b.error) { paper.appendChild(el("div", { class: "p-err", text: b.error })); return paper; }
+    var n = b.header.length, tbl = el("table", { class: "p-table" });
+    tbl.appendChild(el("thead", null, [el("tr", null, b.header.map(function (h) { return el("th", { scope: "col", text: h.label }); }))]));
+    var tb = el("tbody"), grouped = !!d.group;
+    b.groups.forEach(function (g) {
+      if (grouped) tb.appendChild(el("tr", { class: "g" }, [el("td", { colspan: String(n), text: b.groupCaption + ": " + g.label })]));
+      g.rows.forEach(function (r) { tb.appendChild(el("tr", null, r.map(function (v) { return el("td", { text: v }); }))); });
+      var parts = [];
+      if (d.count) parts.push("Кількість записів: " + g.count);
+      if (d.sum) parts.push(b.aggLabel + ": " + fmtNum(g.agg));
+      if (grouped && parts.length) tb.appendChild(el("tr", { class: "gf" }, [el("td", { colspan: String(n), text: parts.join(" · ") })]));
+    });
+    var tp = [];
+    if (d.count) tp.push("Усього записів: " + b.total);
+    if (d.sum) tp.push("Усього — " + b.aggLabel.charAt(0).toLowerCase() + b.aggLabel.slice(1) + ": " + fmtNum(b.aggTotal));
+    if (tp.length) tb.appendChild(el("tr", { class: "gt" }, [el("td", { colspan: String(n), text: tp.join(" · ") })]));
+    tbl.appendChild(tb);
+    paper.appendChild(tbl);
+    paper.appendChild(el("div", { class: "p-foot" }, [el("span", { text: "База даних «Школа»" }), el("span", { text: "Сторінка 1 з 1" })]));
+    return paper;
+  }
+  function renderRPaper() {
+    var d = rdef(), box = $("rpaper"); box.innerHTML = "";
+    box.appendChild(paperEl(d, FR.buildReport(d)));
+  }
+  function renderReports() { renderRTasks(); renderRPick(); renderRCols(); renderRSettings(); renderRPaper(); }
+  hooks.reports = function () { renderRPaper(); };
+  $("printBtn").addEventListener("click", function () { try { window.print(); } catch (e) {} });
+  (function () { var s = document.querySelector("#v-start .schema"); if (s) $("rschema").appendChild(s.cloneNode(true)); })();
+
+  /* ======================= TABLES ======================= */
+  function renderTables() {
+    var chips = $("tchips"); chips.innerHTML = "";
+    TABLES.forEach(function (t) {
+      chips.appendChild(el("button", { type: "button", class: "chip", "aria-pressed": String(t === st.tv), text: t + " (" + DATA[t].length + ")", onclick: function () { st.tv = t; persist(); renderTables(); } }));
+    });
+    var t = st.tv, S = QE.SCHEMA[t], box = $("tview"); box.innerHTML = "";
+    var newIds = (st.added[t] || []).map(function (r) { return r[0]; });
+    $("tnote").textContent = newIds.length ? "Додано через форми в цю таблицю: " + newIds.length + " (виділено жовтим)." : "Через форми в цю таблицю поки нічого не додано.";
+    var tbl = el("table", { class: "rt" });
+    tbl.appendChild(el("thead", null, [el("tr", null, S.fields.map(function (f) { return el("th", { scope: "col", text: f }); }))]));
+    var tb = el("tbody");
+    DATA[t].forEach(function (r) {
+      tb.appendChild(el("tr", { class: newIds.indexOf(r[0]) >= 0 ? "new" : "" }, r.map(function (v, i) { return el("td", { text: QE.fmtVal(v, S.types[i]) }); })));
+    });
+    tbl.appendChild(tb); box.appendChild(tbl);
+  }
+  var clearBtn = $("clearAdded"), clearArmed = false;
+  clearBtn.addEventListener("click", function () {
+    if (!clearArmed) { clearArmed = true; clearBtn.textContent = "Точно? Натисни ще раз — записи буде видалено"; setTimeout(function () { clearArmed = false; clearBtn.textContent = "Видалити всі записи, додані через форми"; }, 4000); return; }
+    st.added = {}; st.saves = {}; persist(); location.reload();
+  });
+  hooks.tables = renderTables;
+
+  
+  /* ======================= SELF-ASSESSMENT ======================= */
+  function cnt(ids) { return ids.filter(function (i) { return st.done[i]; }).length; }
+  var SELF = [
+    { id: "c1", q: "Моя форма не пропускає помилок: є списки, обов’язкові поля й зрозумілі підписи.",
+      auto: function () { return "За даними сторінки: виконано завдань із форм — " + cnt(["f1", "f2"]) + " з 2."; },
+      fix: "forms", fixText: "Повернись до вкладки «Форми»." },
+    { id: "c2", q: "Мій звіт згрупований, відсортований і має підсумки.",
+      auto: function () { return "За даними сторінки: виконано завдань зі звітів — " + cnt(["r1", "r2"]) + " з 2."; },
+      fix: "reports", fixText: "Повернись до вкладки «Звіти»." },
+    { id: "c3", q: "Можу пояснити, чим відрізняються таблиця, запит, форма й звіт і коли що використовувати.",
+      fix: "start", fixText: "Відкрий «Нагадування» на вкладці «Старт»." },
+    { id: "c4", q: "Практичну частину я виконав(-ла) самостійно, без підказок і допомоги.",
+      fix: "forms", fixText: "Спробуй ще раз виконати завдання без підказок." },
+    { id: "c5", q: "Можу за дві хвилини розповісти про свій проєкт: що зробив(-ла), що вийшло найкраще й що покращив(-ла) б.",
+      fix: "self", fixText: "Прочитай свій план виступу вголос двічі." }
+  ];
+  var LEVELS = [[3, "Так, упевнено"], [2, "Частково"], [1, "Поки ні"]];
+  function selfTotal() { var s = 0; SELF.forEach(function (c) { s += st.self[c.id] || 0; }); return s; }
+  function selfDone() { return SELF.every(function (c) { return st.self[c.id]; }); }
+
+  function listNames(obj) { return Object.keys(obj).map(function (k) { return "«" + obj[k] + "»"; }); }
+  function planParagraph() {
+    var f = listNames(st.objs.forms), r = listNames(st.objs.reports);
+    return "Мій проєкт — база даних школи. " +
+      (f.length ? "Я створив(-ла) форми: " + f.join(", ") + ". " : "Форм я поки не створив(-ла). ") +
+      (r.length ? "Я створив(-ла) звіти: " + r.join(", ") + ". " : "Звітів я поки не створив(-ла). ");
+  }
+  function renderPlan() {
+    var box = $("plan"); box.innerHTML = "";
+    var ol = el("ol", { class: "planlist" });
+    ol.appendChild(el("li", null, [el("b", { text: "Про що проєкт і що я зробив(-ла). " }), el("span", { id: "plan-auto", text: planParagraph() }), el("div", { class: "note", text: "Цей текст складається сам із твоїх виконаних завдань." })]));
+    var l3 = el("li", null, [el("label", { for: "plan-best", text: "Що вийшло найкраще?" }), el("textarea", { id: "plan-best", rows: "2", placeholder: "Наприклад: форма не пропускає неіснуючий клас, бо я зробив(-ла) спадний список." })]);
+    var l4 = el("li", null, [el("label", { for: "plan-improve", text: "Що б я покращив(-ла)?" }), el("textarea", { id: "plan-improve", rows: "2", placeholder: "Наприклад: додав(-ла) б ще один звіт для директора." })]);
+    ol.appendChild(l3); ol.appendChild(l4); box.appendChild(ol);
+    $("plan-best").value = st.plan.best || ""; $("plan-improve").value = st.plan.improve || "";
+    $("plan-best").addEventListener("input", function (e) { st.plan.best = e.target.value; persist(); });
+    $("plan-improve").addEventListener("input", function (e) { st.plan.improve = e.target.value; persist(); });
+  }
+  function renderSelf() {
+    renderPlan();
+    var box = $("selfbox"); box.innerHTML = "";
+    SELF.forEach(function (c, i) {
+      var row = el("div", { class: "sa-row" });
+      row.appendChild(el("p", { class: "sa-q", text: (i + 1) + ". " + c.q }));
+      if (c.auto) row.appendChild(el("p", { class: "sa-auto", text: c.auto() }));
+      var opts = el("div", { class: "sa-opts", role: "group", "aria-label": "Рівень для пункту " + (i + 1) });
+      LEVELS.forEach(function (lv) {
+        opts.appendChild(el("button", { type: "button", "aria-pressed": String(st.self[c.id] === lv[0]), text: lv[1], onclick: function () { st.self[c.id] = lv[0]; persist(); renderSelf(); } }));
+      });
+      row.appendChild(opts); box.appendChild(row);
+    });
+    var out = $("selfout"); out.innerHTML = "";
+    if (!selfDone()) { out.className = "feedback"; out.textContent = ""; $("selfnote").textContent = "Дай відповідь на всі п’ять пунктів — тоді побачиш підсумок."; return; }
+    $("selfnote").textContent = "";
+    var tot = selfTotal(), msg;
+    if (tot >= 13) msg = "Ти впевнено орієнтуєшся в темі.";
+    else if (tot >= 9) msg = "Непогано: більшість умінь уже є, лишилося підтягнути кілька пунктів.";
+    else msg = "Ще є над чим працювати — це нормально. Практичну частину можна повторювати скільки завгодно.";
+    out.className = "feedback ok";
+    out.textContent = "Твоя самооцінка: " + tot + " з 15. " + msg;
+    var weak = SELF.filter(function (c) { return st.self[c.id] === 1; });
+    if (weak.length) {
+      var ul = el("ul", { class: "weak" });
+      weak.forEach(function (c) { ul.appendChild(el("li", null, [c.fixText + " ", el("a", { href: "#" + c.fix, text: "Перейти" })])); });
+      out.appendChild(el("div", { text: "Що підтягнути:" })); out.appendChild(ul);
+    }
+  }
+  hooks.self = renderSelf;
+
+  /* ======================= TEST (one attempt) ======================= */
+  var TOPICS = ["ІТ-професії та цифровий слід", "Дані та їх аналіз", "Бази даних"];
+  /* the first option of every question is the correct one; the order is shuffled for each student */
+  var TEST = [
+    { t: 0, q: "Що входить у роботу адміністратора бази даних?", o: ["Стежить за структурою бази, її збереженням, резервними копіями й правами доступу", "Малює логотипи та банери для сайтів", "Збирає й ремонтує комп’ютери в кабінеті", "Пише рекламні тексти для соціальних мереж"] },
+    { t: 0, q: "Що з наведеного є частиною цифрового сліду людини?", o: ["Публікації, коментарі й вподобання в соціальних мережах", "Паперовий щоденник, що лежить удома в шухляді", "Розклад уроків на стіні в класі", "Записи в зошиті з математики"] },
+    { t: 1, q: "З чого починає дослідження аналітик даних?", o: ["Формулює питання й добирає дані з надійних джерел", "Одразу будує красиву діаграму", "Залишає лише ті дані, що підтверджують його здогад, а решту відкидає", "Робить висновки, а дані збирає потім"] },
+    { t: 1, q: "Яка діаграма найкраще показує, як змінювалася температура повітря протягом року?", o: ["Лінійна (графік)", "Кругова", "Схема зв’язків таблиць", "Блок-схема алгоритму"] },
+    { t: 1, q: "Що таке прогноз на основі даних?", o: ["Обґрунтоване припущення про майбутнє, зроблене за закономірностями в наявних даних", "Гарантована відповідь, яка завжди збувається", "Копія даних, збережена про всяк випадок", "Видалення з таблиці всіх застарілих записів"] },
+    { t: 2, q: "Що таке система керування базами даних (СКБД)?", o: ["Програма для створення, зберігання й опрацювання баз даних, наприклад Microsoft Access або LibreOffice Base", "Операційна система, на якій працює комп’ютер", "Пристрій для зберігання файлів, наприклад флешка", "Мова програмування для створення ігор"] },
+    { t: 2, q: "Що в таблиці бази даних називають записом?", o: ["Рядок із даними про один об’єкт, наприклад про одного учня", "Стовпець з однотипними даними", "Назву таблиці", "Тип даних поля"] },
+    { t: 2, q: "Яке поле таблиці «Учні» найкраще підходить на роль первинного ключа?", o: ["ID_учня — унікальний номер, який не повторюється", "Прізвище, бо його легко запам’ятати", "Дата_народження, бо вона є в кожного", "Ім’я, бо воно коротке"] },
+    { t: 2, q: "Поле ID_класу в таблиці «Учні» посилається на таблицю «Класи». Як називають таке поле?", o: ["Зовнішній ключ", "Первинний ключ", "Підсумок", "Умова відбору"] },
+    { t: 2, q: "Треба знайти всіх учнів, які народилися до 2010 року. Який об’єкт бази даних для цього використати?", o: ["Запит з умовою відбору", "Форму з обов’язковими полями", "Звіт для друку", "Нову порожню таблицю"] },
+    { t: 2, q: "У формі «Запис на гурток» для вибору учня зроблено спадний список замість числового поля. Яка від цього користь?", o: ["Можна вибрати лише наявного учня, тому цілісність даних не порушиться", "Таблиця «Учні» займає менше місця на диску", "Форма швидше друкується на принтері", "Форма сама підраховує підсумки"] },
+    { t: 2, q: "Директорові потрібен друкований список гуртків, згрупований за днями тижня, з кількістю гуртків у кожній групі. Що створити?", o: ["Звіт", "Форму", "Первинний ключ", "Нову таблицю"] }
+  ];
+  function range(n) { var r = []; for (var i = 0; i < n; i++) r.push(i); return r; }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+  function loadTest() { try { var s = localStorage.getItem(TKEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  var tst = storageOK ? loadTest() : null;
+  function saveTest() { if (!storageOK) return false; try { localStorage.setItem(TKEY, JSON.stringify(tst)); return true; } catch (e) { return false; } }
+  function testFinished() { return !!tst && tst.picks.length >= TEST.length; }
+  function testScore() { var s = 0; tst.picks.forEach(function (p) { if (p === 0) s++; }); return s; }
+  function topicStats() {
+    var out = TOPICS.map(function () { return { ok: 0, n: 0 }; });
+    tst.order.forEach(function (qi, pos) { if (tst.picks[pos] === undefined) return; var q = TEST[qi]; out[q.t].n++; if (tst.picks[pos] === 0) out[q.t].ok++; });
+    return out;
+  }
+  function verdict(sc) {
+    if (sc >= 10) return "Відмінний результат.";
+    if (sc >= 7) return "Добрий результат.";
+    if (sc >= 4) return "Є прогалини: повтори матеріал розділу.";
+    return "Потрібно повторити матеріал розділу.";
+  }
+  var selOpt = -1, startArmed = false;
+  function panel(kids, cls) { return el("div", { class: "panel pad " + (cls || "") }, kids); }
+  function renderTest() {
+    var box = $("testbox"); box.innerHTML = "";
+    if (!storageOK) {
+      box.appendChild(panel([el("h3", { text: "Тест недоступний у цьому вікні" }), el("p", { text: "Браузер не зберігає дані (можливо, увімкнено приватний режим), тому система не може запам’ятати, що ти вже відповідав(-ла). Відкрий сторінку у звичайному вікні браузера." })], "testwarn"));
+      return;
+    }
+    if (!tst) { renderTestIntro(box); return; }
+    if (testFinished()) { renderTestDone(box); return; }
+    renderTestQuestion(box);
+  }
+  function renderTestIntro(box) {
+    var p = panel([]);
+    p.appendChild(el("h3", { text: "Перед початком" }));
+    var ul = el("ul", { class: "rules" });
+    ["У тесті " + TEST.length + " запитань, на кожне — чотири варіанти відповіді, правильний один.",
+     "Тест можна пройти лише один раз. На кожне запитання відповідаєш один раз: після кнопки «Відповісти» змінити відповідь не можна.",
+     "Закрив(-ла) або оновив(-ла) сторінку? Нічого страшного: тест продовжиться з того самого запитання.",
+     "Наприкінці побачиш результат і підсумок за темами. Правильні відповіді не показуються.",
+     "Тест триває 7–10 хвилин. Почни, коли будеш готовий(-а)."].forEach(function (t) { ul.appendChild(el("li", { text: t })); });
+    p.appendChild(ul);
+    var fb = el("div", { class: "feedback", role: "status" });
+    var btn = el("button", { class: "btn primary", type: "button", text: "Почати тест (одна спроба)", onclick: function () {
+      if (!(st.name || "").trim()) { fb.className = "feedback bad"; fb.textContent = "Спочатку впиши прізвище та ім’я у верхній частині сторінки: вони потрібні для знімка екрана з результатом."; $("who").focus(); return; }
+      if (!startArmed) {
+        startArmed = true; fb.className = "feedback"; btn.textContent = "Точно почати? Другої спроби не буде";
+        setTimeout(function () { startArmed = false; btn.textContent = "Почати тест (одна спроба)"; }, 6000); return;
+      }
+      var order = shuffle(range(TEST.length));
+      tst = { name: st.name.trim(), started: nowIso(), order: order, perm: order.map(function () { return shuffle([0, 1, 2, 3]); }), picks: [], finished: null };
+      if (!saveTest()) { tst = null; fb.className = "feedback bad"; fb.textContent = "Не вдалося запам’ятати початок тесту. Відкрий сторінку у звичайному вікні браузера."; return; }
+      selOpt = -1; startArmed = false; renderTest();
+    } });
+    p.appendChild(btn); p.appendChild(fb); box.appendChild(p);
+  }
+  function renderTestQuestion(box) {
+    var pos = tst.picks.length, q = TEST[tst.order[pos]], perm = tst.perm[pos], n = TEST.length;
+    var p = panel([]);
+    p.appendChild(el("p", { class: "tprog", text: "Запитання " + (pos + 1) + " з " + n }));
+    p.appendChild(el("div", { class: "progress", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(n), "aria-valuenow": String(pos) }, [el("i", { style: "width:" + Math.round(pos / n * 100) + "%" })]));
+    p.appendChild(el("p", { class: "tq", text: q.q }));
+    var opts = el("div", { class: "topts", role: "group", "aria-label": "Варіанти відповіді" });
+    perm.forEach(function (oi) {
+      opts.appendChild(el("button", { type: "button", "aria-pressed": String(selOpt === oi), text: q.o[oi], onclick: function () { selOpt = oi; renderTest(); } }));
+    });
+    p.appendChild(opts);
+    var fb = el("div", { class: "feedback", role: "status" });
+    var go = el("button", { class: "btn primary", type: "button", text: pos === n - 1 ? "Відповісти й завершити тест" : "Відповісти", disabled: selOpt < 0, onclick: function () {
+      if (selOpt < 0) return;
+      tst.picks.push(selOpt);
+      if (tst.picks.length >= n) tst.finished = nowIso();
+      if (!saveTest()) { tst.picks.pop(); tst.finished = null; fb.className = "feedback bad"; fb.textContent = "Не вдалося зберегти відповідь. Спробуй ще раз."; return; }
+      selOpt = -1; renderTest(); window.scrollTo({ top: document.querySelector("nav.tabs").offsetTop - 1 });
+    } });
+    p.appendChild(el("div", { class: "tact" }, [go, el("span", { class: "note", text: "Після натискання змінити відповідь не можна." })]));
+    p.appendChild(fb); box.appendChild(p);
+  }
+  function minutes(a, b) { var m = Math.max(1, Math.round((new Date(b) - new Date(a)) / 60000)); return m + " хв"; }
+  function renderTestDone(box) {
+    var sc = testScore(), n = TEST.length, p = panel([], "tdone");
+    p.appendChild(el("h3", { text: "Тест завершено" }));
+    p.appendChild(el("p", { class: "big", text: sc + " з " + n }));
+    p.appendChild(el("p", { text: verdict(sc) + " Час проходження: " + minutes(tst.started, tst.finished) + "." }));
+    var stt = topicStats();
+    TOPICS.forEach(function (name, i) { p.appendChild(el("div", { class: "row" }, [el("span", { text: name }), el("b", { text: stt[i].ok + " з " + stt[i].n })])); });
+    p.appendChild(el("p", { class: "note", text: "Другої спроби немає. Тема з найнижчим результатом — те, що варто повторити." }));
+    p.appendChild(el("p", null, [el("a", { class: "btn primary", href: "#result", text: "Перейти до результату" })]));
+    box.appendChild(p);
+  }
+  hooks.test = renderTest;
+
+  /* ======================= RESULT ======================= */
+  function fmtTime(iso) { return new Date(iso).toLocaleString("uk-UA", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }); }
+  function renderSummary() {
+    var box = $("rep-summary"); box.innerHTML = "";
+    var rows = [], core = [];
+    FTASKS.filter(function (t) { return !t.sandbox; }).forEach(function (t, i) { rows.push({ g: "Практична: форми", text: (i + 1) + ". " + t.title + (t.bonus ? " (додаткове)" : ""), val: st.done[t.id] ? "✓ " + fmtTime(st.done[t.id]) : "—", ok: !!st.done[t.id] }); if (!t.bonus) core.push(!!st.done[t.id]); });
+    RTASKS.filter(function (t) { return !t.sandbox; }).forEach(function (t, i) { rows.push({ g: "Практична: звіти", text: (i + 1) + ". " + t.title + (t.bonus ? " (додаткове)" : ""), val: st.done[t.id] ? "✓ " + fmtTime(st.done[t.id]) : "—", ok: !!st.done[t.id] }); if (!t.bonus) core.push(!!st.done[t.id]); });
+    var sd = selfDone();
+    rows.push({ g: "Самооцінювання", text: "Рівень умінь за п’ятьма пунктами", val: sd ? selfTotal() + " з 15" : "не заповнено", ok: sd }); core.push(sd);
+    var tf = testFinished();
+    rows.push({ g: "Тест за розділом 1", text: "Одна спроба", val: tf ? testScore() + " з " + TEST.length + " (" + fmtTime(tst.finished) + ")" : "ще не пройдено", ok: tf }); core.push(tf);
+    var n = core.filter(Boolean).length;
+    box.appendChild(el("p", { text: "Учень / учениця: " + (st.name || "— впиши прізвище та ім’я на початку сторінки —") }));
+    box.appendChild(el("p", { class: "big", text: "Виконано " + n + " з " + core.length + " основних кроків" }));
+    var cur = "";
+    rows.forEach(function (x) {
+      if (x.g !== cur) { cur = x.g; box.appendChild(el("p", { style: "margin:16px 0 0;font-weight:700", text: cur })); }
+      box.appendChild(el("div", { class: "row" }, [el("span", { text: x.text }), el("span", { class: "st" + (x.ok ? " ok" : ""), text: x.val })]));
+    });
+    if (tf) {
+      box.appendChild(el("p", { style: "margin:16px 0 0;font-weight:700", text: "Тест за темами" }));
+      var stt = topicStats();
+      TOPICS.forEach(function (name, i) { box.appendChild(el("div", { class: "row" }, [el("span", { text: name }), el("span", { class: "st", text: stt[i].ok + " з " + stt[i].n })])); });
+    }
+    var tot = 0; Object.keys(st.added).forEach(function (t) { tot += st.added[t].length; });
+    box.appendChild(el("p", { style: "color:var(--muted);margin-top:12px", text: "Записів, доданих через форми: " + tot + "." }));
+    var next = $("resnext"); next.innerHTML = "";
+    var left = [];
+    if (cnt(["f1", "f2"]) < 2) left.push(["forms", "Виконай завдання на форми"]);
+    if (cnt(["r1", "r2"]) < 2) left.push(["reports", "Виконай завдання зі звітів"]);
+    if (!sd) left.push(["self", "Заповни самооцінювання"]);
+    if (!tf) left.push(["test", "Пройди тест"]);
+    if (left.length) {
+      next.appendChild(el("p", { class: "lead", text: "Що ще лишилося:" }));
+      var ul = el("ul", { class: "weak" });
+      left.forEach(function (x) { ul.appendChild(el("li", null, [el("a", { href: "#" + x[0], text: x[1] })])); });
+      next.appendChild(ul);
+    } else next.appendChild(el("p", { class: "feedback ok", text: "Усе виконано. Зроби знімок екрана цієї сторінки й надішли вчителю." }));
+  }
+  function renderObjs() {
+    var box = $("objs"); box.innerHTML = "";
+    function list(title, obj) {
+      var ids = Object.keys(obj), p = el("div", { class: "panel" }, [el("b", { text: title })]);
+      if (!ids.length) p.appendChild(el("p", { class: "empty", text: "Поки нічого. Виконай завдання — і об’єкт з’явиться тут." }));
+      else { var ul = el("ul"); ids.forEach(function (k) { ul.appendChild(el("li", { text: obj[k] })); }); p.appendChild(ul); }
+      return p;
+    }
+    box.appendChild(list("Форми", st.objs.forms)); box.appendChild(list("Звіти", st.objs.reports));
+  }
+  hooks.result = function () { renderSummary(); renderObjs(); };
+  var resetBtn = $("resetBtn"), armed = false;
+  resetBtn.addEventListener("click", function () {
+    if (!armed) { armed = true; resetBtn.textContent = "Точно? Натисни ще раз — практична частина й самооцінка будуть очищені (тест не змінюється)"; setTimeout(function () { armed = false; resetBtn.textContent = "Почати практичну частину заново"; }, 5000); return; }
+    var name = st.name;
+    st = { name: name, done: {}, forms: {}, reps: {}, saves: {}, added: {}, objs: { forms: {}, reports: {} }, self: {}, plan: { best: "", improve: "" }, ft: "f1", rt: "r1", tv: "Учні" };
+    persist(); location.hash = "start"; location.reload();
+  });
+
+  /* ======================= TEACHER (hidden: #teacher) ======================= */
+  function renderTeacher() {
+    var box = $("teacherbox"); box.innerHTML = "";
+    var info = !storageOK ? "Браузер не зберігає дані." : !tst ? "У цьому браузері тест ще не розпочато." :
+      "Ім’я: " + tst.name + ". Розпочато: " + fmtTime(tst.started) + ". Відповідей: " + tst.picks.length + " з " + TEST.length + (testFinished() ? ". Результат: " + testScore() + " з " + TEST.length + "." : ".");
+    box.appendChild(el("p", { text: info }));
+    var b = el("button", { class: "btn", type: "button", text: "Скинути тест у цьому браузері", disabled: !tst, onclick: function () {
+      if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Точно? Натисни ще раз — учень зможе пройти тест заново"; return; }
+      try { localStorage.removeItem(TKEY); } catch (e) {}
+      location.hash = "start"; location.reload();
+    } });
+    box.appendChild(b);
+  }
+  hooks.teacher = renderTeacher;
+  hooks.start = function () {};
+
+  /* ======================= INIT ======================= */
+  renderForms(); renderReports(); renderSelf();
+  route();
+})();
+
+</script>
+</body>
+</html>
